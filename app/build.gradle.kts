@@ -36,6 +36,7 @@ android {
     packaging {
         resources {
             excludes += "META-INF/INDEX.LIST"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 
@@ -47,9 +48,20 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.ultimatebarx)// 状态栏
-    implementation(libs.lottie)// 动画库
-    implementation(libs.gson)// json库
+    implementation(libs.lottie)// 动画
+    implementation(libs.gson)// json
+    implementation(libs.ktor.client.core)// http请求
+    implementation(libs.ktor.client.android)// http请求
+    implementation(libs.ktor.client.logging)// http请求
+    implementation(libs.ktor.client.okhttp)// http请求
+    implementation(libs.ktor.client.serialization)// ktor序列化
+    implementation(libs.ktor.client.content.negotiation)// ktor序列化
+    implementation(libs.kotlinx.serialization.json)// ktor序列化
+    implementation(libs.jsoup)// html解析
     implementation(libs.hutool.http)// http库
-    implementation(libs.hutool.crypto)/// 加/解密库
+    implementation(libs.hutool.crypto)// 加/解密
+    implementation(libs.ktor.client.cio.jvm)
 }

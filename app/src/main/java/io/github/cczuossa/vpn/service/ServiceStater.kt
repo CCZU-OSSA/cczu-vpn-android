@@ -39,22 +39,24 @@ object ServiceStater {
 
     fun start(activity: MainActivity) {
         // 拉起并绑定服务
-        activity.prepare { status, _ ->
-            if (status) {
-                connector = { service ->
-                    // 启动成功
-                    // TODO: 配置服务并启用转发
-                }
-                // 绑定并启动服务
-                activity.bindService(
-                    Intent(activity, EnlinkVpnService::class.java),
-                    connection,
-                    Context.BIND_AUTO_CREATE
-                )
-            } else {
-                // 拒绝了你用什么！！ [○･｀Д´･ ○]
-                // TODO: 弹一个弹窗提醒无法继续使用
+        activity.prepare()
+    }
+
+    fun prepare(activity: MainActivity,status: Boolean) {
+        if (status) {
+            connector = { service ->
+                // 启动成功
+                // TODO: 配置服务并启用转发
             }
+            // 绑定并启动服务
+            activity.bindService(
+                Intent(activity, EnlinkVpnService::class.java),
+                connection,
+                Context.BIND_AUTO_CREATE
+            )
+        } else {
+            // 拒绝了你用什么！！ [○･｀Д´･ ○]
+            // TODO: 弹一个弹窗提醒无法继续使用
         }
     }
 }

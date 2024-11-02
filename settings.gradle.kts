@@ -9,6 +9,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        maven("https://kotlin.bintray.com/kotlinx")
     }
 }
 dependencyResolutionManagement {
