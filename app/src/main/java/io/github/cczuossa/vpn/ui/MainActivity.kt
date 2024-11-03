@@ -46,16 +46,20 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_WIFI_STATE// 基础wifi状态检查权限
     )
 
-    private val connection by lazy {
+    val connection by lazy {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 if (binder is EnlinkVpnService.EnlinkVpnServiceBinder) {
-                    _binding.mainStatusBroad.setState(StatusBroad.State.START)
+                    _binding.mainStatusBroad.changeStateTo(StatusBroad.State.START)
+                    _binding.mainStatusBroad.setTitle("连接成功")
+                    _binding.mainStatusBroad.setSubTitle("已可以正常访问校园网")
                 }
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                _binding.mainStatusBroad.setTitle("错误")
+                _binding.mainStatusBroad.setSubTitle("VPN服务断开")
             }
 
         }
@@ -80,6 +84,10 @@ class MainActivity : AppCompatActivity() {
             // 添加通知权限
             REQUEST_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {// 安卓15及其以上
+            // 添加特殊前台服务权限
+            REQUEST_PERMISSIONS.add(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE)
+        }
         mActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 ServiceStater.prepare(this, true)
@@ -103,17 +111,27 @@ class MainActivity : AppCompatActivity() {
                     WebVpnClient(ConfigUtils.str("user"), ConfigUtils.str("pass")).apply {
                         login()
                         if (userId().isNotBlank()) {
+                            "try start service".log()
                             ServiceStater.start(this@MainActivity)
+                            delay(1000)
+                        } else {
+                            _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                            _binding.mainStatusBroad.setTitle("出现错误")
+                            _binding.mainStatusBroad.setSubTitle("账号或密码错误")
                         }
                     }
                 }
             } else {
+                connecting = false
                 toastLong("请先设置账号密码后继续")
-                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
-                _binding.mainStatusBroad.setTitle("出现错误")
-                _binding.mainStatusBroad.setSubTitle("未设置正确的账号")
                 GlobalScope.launch {
-                    delay(1000)
+                    delay(2000)
+                    _binding.mainStatusBroad.post {
+                        _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                        _binding.mainStatusBroad.setTitle("出现错误")
+                        _binding.mainStatusBroad.setSubTitle("未设置正确的账号")
+                    }
+                    delay(500)
                     jump(AccountActivity::class.java)
                 }
             }
@@ -141,10 +159,19 @@ class MainActivity : AppCompatActivity() {
         menuRoot.addView(MainMenuItem(this).apply {
             setTitle("账号")
             setIcon(resources.getDrawable(R.drawable.ic_user, null))
+            setOnClickListener {
+                jump(AccountActivity::class.java)
+            }
+        })
+        menuRoot.addView(MainMenuItem(this).apply {
+            setTitle("配置应用")
+            setIcon(resources.getDrawable(R.drawable.ic_apps, null))
+            // TODO: 获取全部应用，在代理中使用
         })
         menuRoot.addView(MainMenuItem(this).apply {
             setTitle("关于")
             setIcon(resources.getDrawable(R.drawable.ic_about, null))
+            //TODO: 弹出关于界面
         })
     }
 

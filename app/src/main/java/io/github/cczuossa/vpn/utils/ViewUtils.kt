@@ -39,14 +39,14 @@ fun Context.jump(clazz: Class<*>) {
     startActivity(Intent(this, clazz))
 }
 
-fun LottieAnimationView.addOnAnimationEndListener(onEnd: () -> Unit) {
-    this.addAnimatorListener(object : AnimatorListener {
+fun LottieAnimationView.addOnAnimationEndListener(onEnd: (listener: AnimatorListener) -> Unit) {
+    val animatorListener = object : AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
 
         }
 
         override fun onAnimationEnd(animation: Animator) {
-            onEnd.invoke()
+            onEnd.invoke(this)
         }
 
         override fun onAnimationCancel(animation: Animator) {
@@ -57,5 +57,27 @@ fun LottieAnimationView.addOnAnimationEndListener(onEnd: () -> Unit) {
 
         }
 
-    })
+    }
+    this.addAnimatorListener(animatorListener)
+}
+fun LottieAnimationView.addOnAnimationRepeatistener(onEnd: (listener: AnimatorListener) -> Unit) {
+    val animatorListener = object : AnimatorListener {
+        override fun onAnimationStart(animation: Animator) {
+
+        }
+
+        override fun onAnimationEnd(animation: Animator) {
+
+        }
+
+        override fun onAnimationCancel(animation: Animator) {
+
+        }
+
+        override fun onAnimationRepeat(animation: Animator) {
+            onEnd.invoke(this)
+        }
+
+    }
+    this.addAnimatorListener(animatorListener)
 }

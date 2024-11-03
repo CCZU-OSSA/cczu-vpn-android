@@ -10,6 +10,7 @@ import android.os.Looper
 import io.github.cczuossa.vpn.CCZUVpnAndroid
 import io.github.cczuossa.vpn.ui.MainActivity
 import io.github.cczuossa.vpn.utils.prepare
+import io.github.cczuossa.vpn.utils.toastLong
 
 object ServiceStater {
     private lateinit var connector: (service: EnlinkVpnService) -> Unit
@@ -50,14 +51,20 @@ object ServiceStater {
                 // TODO: 配置服务并启用转发
             }
             // 绑定并启动服务
+            activity.startService(Intent(activity, EnlinkVpnService::class.java))
             activity.bindService(
                 Intent(activity, EnlinkVpnService::class.java),
                 connection,
                 0
             )
+            activity.bindService(
+                Intent(activity, EnlinkVpnService::class.java),
+                activity.connection,
+                0
+            )
         } else {
             // 拒绝了你用什么！！ [○･｀Д´･ ○]
-            // TODO: 弹一个弹窗提醒无法继续使用
+            activity.toastLong("您拒绝了创建VPN，因此无法继续")
         }
     }
 }

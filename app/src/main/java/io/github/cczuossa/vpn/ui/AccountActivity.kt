@@ -32,6 +32,8 @@ class AccountActivity : AppCompatActivity() {
 
 
     private fun initView() {
+        _binding.accountEditUser.setText(ConfigUtils.str("user"))
+        _binding.accountEditPass.setText(ConfigUtils.str("pass"))
         _binding.accountBack.setOnClickListener { finish() }
         _binding.accountSave.setOnClickListener {
             if (_binding.accountEditUser.text.toString().isBlank() || _binding.accountEditPass.text.toString()

@@ -78,7 +78,7 @@ class WebVpnClient(val user: String, val password: String) {
             setBody(FormDataContent(Parameters.build {
                 params.forEach { (name, value) -> append(name, value) }
             }))
-        }.headers["location"]!!
+        }.headers["location"] ?: return@withContext
         client.get(def)
         client.cookies(ROOT).forEach {
             "ck: $it".log()

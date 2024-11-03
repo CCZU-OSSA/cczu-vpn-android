@@ -11,6 +11,11 @@ import android.widget.TextView
 import com.airbnb.lottie.LottieAnimationView
 import io.github.cczuossa.vpn.R
 import io.github.cczuossa.vpn.utils.addOnAnimationEndListener
+import io.github.cczuossa.vpn.utils.addOnAnimationRepeatistener
+import io.github.cczuossa.vpn.utils.log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class StatusBroad : LinearLayout {
 
@@ -32,81 +37,79 @@ class StatusBroad : LinearLayout {
     }
 
     fun changeStateTo(state: State) {
+        "change $lastState to $state".log()
         icon.removeAllAnimatorListeners()
         when (state) {
+
             State.START -> {}
             State.STOP -> {}
-
             State.CONNECTING -> {
+                icon.repeatCount = 0
                 icon.addOnAnimationEndListener {
-                    icon.repeatCount = 0
-                    icon.speed = 2f
-                    icon.addOnAnimationEndListener {
-                        // 结束后循环加载动画
-                        icon.speed = 1.5f
-                        icon.setAnimation("lottie/loading.json")
-                        icon.repeatCount = ValueAnimator.INFINITE
-                        icon.playAnimation()
-                    }
-                    when (lastState) {
-                        State.CONNECTING -> {
-
-                        }
-
-                        State.START -> {
-
-                        }
-
-                        State.STOP -> {
-                            icon.setAnimation("lottie/stop2loading.json")
-
-                        }
-
-                        State.ERROR -> {
-                            icon.setAnimation("lottie/loading2error.json")
-                            icon.speed = -2f
-                        }
-                    }
-
+                    // 结束后循环加载动画
+                    icon.speed = 1.5f
+                    icon.repeatCount = ValueAnimator.INFINITE
+                    icon.setAnimation("lottie/loading.json")
                     icon.playAnimation()
-                    setTitle("连接中...")
-                    setSubTitle("尝试验证账号信息")
+                    icon.removeAnimatorListener(it)
                 }
+                setTitle("连接中...")
+                setSubTitle("尝试验证账号信息")
+                when (lastState) {
+                    State.CONNECTING -> {
+
+                    }
+
+                    State.START -> {
+
+                    }
+
+                    State.STOP -> {
+                        icon.speed = 2f
+                        icon.setAnimation("lottie/stop2loading.json")
+                    }
+
+                    State.ERROR -> {
+                        icon.setAnimation("lottie/loading2error.json")
+                        icon.speed = -2f
+                    }
+                }
+                icon.playAnimation()
+
 
             }
 
             State.ERROR -> {
-                icon.addOnAnimationEndListener {
-                    when (lastState) {
-                        State.CONNECTING -> {
-                            icon.setAnimation("lottie/loading2error.json")
-                        }
-
-                        State.START -> {
-                            //TODO: icon.setAnimation("lottie/start2error.json")
-                        }
-
-                        State.STOP -> {
-
-                        }
-
-                        State.ERROR -> {
-                        }
+                icon.repeatCount = 0
+                icon.speed = 2f
+                when (lastState) {
+                    State.CONNECTING -> {
+                        icon.setAnimation("lottie/loading2error.json")
                     }
 
-                    icon.repeatCount = 0
-                    icon.speed = 2f
-                    icon.playAnimation()
+                    State.START -> {
+                        //TODO: icon.setAnimation("lottie/start2error.json")
+                    }
+
+                    State.STOP -> {
+
+                    }
+
+                    State.ERROR -> {
+                    }
                 }
+                icon.playAnimation()
             }
         }
+
+        lastState = state
     }
 
     fun setState(start: StatusBroad.State) {
         when (start) {
             State.START -> setIcon(resources.getDrawable(R.drawable.ic_check, null))
             State.STOP -> resources.getDrawable(R.drawable.ic_stop, null)
-            State.CONNECTING -> TODO()
+            State.CONNECTING -> {}
             State.ERROR -> resources.getDrawable(R.drawable.ic_error, null)
         }
     }
