@@ -27,10 +27,11 @@ object ServiceStater {
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 // 服务断开时
+                CCZUVpnAndroid.APP.startService(
+                    Intent(CCZUVpnAndroid.APP, EnlinkVpnService::class.java)
+                )
                 CCZUVpnAndroid.APP.bindService(
-                    Intent(CCZUVpnAndroid.APP, EnlinkVpnService::class.java),
-                    this,
-                    Context.BIND_AUTO_CREATE
+                    Intent(CCZUVpnAndroid.APP, EnlinkVpnService::class.java), this, 0
                 )
             }
 
@@ -52,7 +53,7 @@ object ServiceStater {
             activity.bindService(
                 Intent(activity, EnlinkVpnService::class.java),
                 connection,
-                Context.BIND_AUTO_CREATE
+                0
             )
         } else {
             // 拒绝了你用什么！！ [○･｀Д´･ ○]

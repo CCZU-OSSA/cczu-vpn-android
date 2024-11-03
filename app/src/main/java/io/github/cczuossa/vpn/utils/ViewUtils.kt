@@ -5,6 +5,7 @@ import android.animation.Animator.AnimatorListener
 import android.animation.ValueAnimator
 import android.app.UiModeManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.widget.Toast
@@ -32,6 +33,10 @@ fun Int.dp2px(resources: Resources): Int {
 
 fun Context.toastLong(msg: String) {
     Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+}
+
+fun Context.jump(clazz: Class<*>) {
+    startActivity(Intent(this, clazz))
 }
 
 fun LottieAnimationView.addOnAnimationEndListener(onEnd: () -> Unit) {

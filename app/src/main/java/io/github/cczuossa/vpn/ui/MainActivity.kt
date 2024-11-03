@@ -2,12 +2,14 @@ package io.github.cczuossa.vpn.ui
 
 import android.Manifest
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -16,14 +18,18 @@ import com.zackratos.ultimatebarx.ultimatebarx.statusBar
 import io.github.cczuossa.vpn.R
 import io.github.cczuossa.vpn.databinding.ActivityMainBinding
 import io.github.cczuossa.vpn.http.WebVpnClient
+import io.github.cczuossa.vpn.service.EnlinkVpnService
 import io.github.cczuossa.vpn.service.ServiceStater
+import io.github.cczuossa.vpn.utils.ConfigUtils
 import io.github.cczuossa.vpn.utils.ViewUtils.getStatusBarHeight
 import io.github.cczuossa.vpn.utils.ViewUtils.isDarkMode
+import io.github.cczuossa.vpn.utils.jump
 import io.github.cczuossa.vpn.utils.log
 import io.github.cczuossa.vpn.utils.toastLong
 import io.github.cczuossa.vpn.view.MainMenuItem
 import io.github.cczuossa.vpn.view.StatusBroad
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +45,21 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_NETWORK_STATE,// 基础网络状态检查权限
         Manifest.permission.ACCESS_WIFI_STATE// 基础wifi状态检查权限
     )
+
+    private val connection by lazy {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                if (binder is EnlinkVpnService.EnlinkVpnServiceBinder) {
+                    _binding.mainStatusBroad.setState(StatusBroad.State.START)
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+            }
+
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,27 +89,33 @@ class MainActivity : AppCompatActivity() {
             it.forEach {
                 if (!it.value) {
                     // 一个都不能拒绝哦 (✺ω✺)
-                    // TODO: 弹一个弹窗提醒无法继续使用
                     "has permission was false".log()
+                    toastLong("您必须同意全部权限后应用才可以正常运行")
                     return@registerForActivityResult
                 }
 
             }
 
-            // TODO: 检查账号是否设置，进行登录验证
             "check account".log()
-            // TODO: 验证成功，交给服务器进行登录
-            GlobalScope.launch {
-                "try login".log()
-                /*
-                WebVpnClient("2200060309", "@lliiooll.com11").apply {
-                    login()
-                    userId()
-                    gatewayRulesData()
-                    ServiceStater.start(this@MainActivity)
+            if (ConfigUtils.hasString("user") && ConfigUtils.hasString("pass")) {
+                GlobalScope.launch {
+                    "try login".log()
+                    WebVpnClient(ConfigUtils.str("user"), ConfigUtils.str("pass")).apply {
+                        login()
+                        if (userId().isNotBlank()) {
+                            ServiceStater.start(this@MainActivity)
+                        }
+                    }
                 }
-
-                 */
+            } else {
+                toastLong("请先设置账号密码后继续")
+                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                _binding.mainStatusBroad.setTitle("出现错误")
+                _binding.mainStatusBroad.setSubTitle("未设置正确的账号")
+                GlobalScope.launch {
+                    delay(1000)
+                    jump(AccountActivity::class.java)
+                }
             }
 
         }
@@ -98,6 +125,7 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
         // 设置状态面板(默认StatusBroad.State.STOP)
         val statusBroad = _binding.mainStatusBroad
+        bindService(Intent(this, EnlinkVpnService::class.java), connection, 0)
         val menuRoot = _binding.mainMenuRoot
         statusBroad.setOnClickListener {
             if (connecting) {
