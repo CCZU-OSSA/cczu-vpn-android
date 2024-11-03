@@ -42,7 +42,7 @@ object ServiceStater {
         activity.prepare()
     }
 
-    fun prepare(activity: MainActivity,status: Boolean) {
+    fun prepare(activity: MainActivity, status: Boolean) {
         if (status) {
             connector = { service ->
                 // 启动成功

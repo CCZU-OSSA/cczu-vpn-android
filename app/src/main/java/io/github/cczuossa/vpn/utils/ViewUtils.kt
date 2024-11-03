@@ -1,9 +1,13 @@
 package io.github.cczuossa.vpn.utils
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
+import android.animation.ValueAnimator
 import android.app.UiModeManager
 import android.content.Context
 import android.content.res.Resources
 import android.os.Build
+import com.airbnb.lottie.LottieAnimationView
 
 object ViewUtils {
     @JvmStatic
@@ -23,4 +27,25 @@ object ViewUtils {
 
 fun Int.dp2px(resources: Resources): Int {
     return Math.round(resources.displayMetrics.density * this)
+}
+
+fun LottieAnimationView.addOnAnimationEndListener(onEnd: () -> Unit) {
+    this.addAnimatorListener(object : AnimatorListener {
+        override fun onAnimationStart(animation: Animator) {
+
+        }
+
+        override fun onAnimationEnd(animation: Animator) {
+            onEnd.invoke()
+        }
+
+        override fun onAnimationCancel(animation: Animator) {
+
+        }
+
+        override fun onAnimationRepeat(animation: Animator) {
+
+        }
+
+    })
 }

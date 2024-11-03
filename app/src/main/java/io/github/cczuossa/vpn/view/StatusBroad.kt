@@ -1,16 +1,22 @@
 package io.github.cczuossa.vpn.view
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
+import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.AnimatorRes
+import com.airbnb.lottie.LottieAnimationView
 import io.github.cczuossa.vpn.R
+import io.github.cczuossa.vpn.utils.addOnAnimationEndListener
 
 class StatusBroad : LinearLayout {
 
-    private var icon: ImageView
+    private var icon: LottieAnimationView
     private var title: TextView
     private var subTitle: TextView
 
@@ -33,7 +39,17 @@ class StatusBroad : LinearLayout {
             }
 
             State.CONNECTING -> {
-
+                icon.setAnimation("lottie/stop2loading.json")
+                icon.repeatCount = 0
+                icon.speed = 2f
+                icon.addOnAnimationEndListener {
+                    // 结束后循环加载动画
+                    icon.speed = 1f
+                    icon.setAnimation("lottie/loading.json")
+                    icon.repeatCount = ValueAnimator.INFINITE
+                    icon.playAnimation()
+                }
+                icon.playAnimation()
             }
 
             State.ERROR -> {

@@ -9,11 +9,11 @@
               android:background="@drawable/bg_status_broad"
               android:layout_width="match_parent"
               android:layout_height="80dp">
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
             android:layout_margin="30dp"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/ic_launcher_background"
+            android:src="@drawable/ic_stop"
             android:id="@+id/status_broad_icon"/>
     <LinearLayout
             android:orientation="vertical"

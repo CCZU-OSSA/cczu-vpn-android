@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         val statusBroad = findViewById<StatusBroad>(R.id.main_status_broad)
         statusBroad.setOnClickListener {
             // 尝试检查权限
+            statusBroad.changeStateTo(StatusBroad.State.CONNECTING)
             mPermissionResult.launch(REQUEST_PERMISSIONS.toTypedArray())
         }
     }
