@@ -23,16 +23,16 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent">
-        <TextView
-                android:text="大标题"
-                android:textSize="20sp"
+        <TextSwitcher
+                android:text="@string/text_status_broad_title_stop"
+                android:textSize="18sp"
                 android:textColor="@color/text_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/status_broad_title"/>
-        <TextView
-                android:text="小标题"
-                android:textSize="15sp"
+        <TextSwitcher
+                android:text="@string/text_status_broad_subtitle_stop"
+                android:textSize="13sp"
                 android:textColor="@color/text_title"
                 android:layout_marginTop="5dp"
                 android:layout_width="wrap_content"

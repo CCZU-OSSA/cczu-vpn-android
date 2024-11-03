@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">吊大VPN</string>
+    <string name="text_status_broad_title_stop">未连接</string>
+    <string name="text_status_broad_subtitle_stop">请点击连接</string>
 </resources>

@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,8 @@ import io.github.cczuossa.vpn.service.ServiceStater
 import io.github.cczuossa.vpn.utils.ViewUtils.getStatusBarHeight
 import io.github.cczuossa.vpn.utils.ViewUtils.isDarkMode
 import io.github.cczuossa.vpn.utils.log
+import io.github.cczuossa.vpn.utils.toastLong
+import io.github.cczuossa.vpn.view.MainMenuItem
 import io.github.cczuossa.vpn.view.StatusBroad
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var _binding: ActivityMainBinding
     lateinit var mActivityResult: ActivityResultLauncher<Intent>
     lateinit var mPermissionResult: ActivityResultLauncher<Array<String>>
+    var connecting = false
 
     val REQUEST_PERMISSIONS = arrayListOf(
         Manifest.permission.INTERNET,// 基础网络权限
@@ -76,12 +80,15 @@ class MainActivity : AppCompatActivity() {
             // TODO: 验证成功，交给服务器进行登录
             GlobalScope.launch {
                 "try login".log()
+                /*
                 WebVpnClient("2200060309", "@lliiooll.com11").apply {
                     login()
                     userId()
                     gatewayRulesData()
                     ServiceStater.start(this@MainActivity)
                 }
+
+                 */
             }
 
         }
@@ -90,12 +97,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun initView() {
         // 设置状态面板(默认StatusBroad.State.STOP)
-        val statusBroad = findViewById<StatusBroad>(R.id.main_status_broad)
+        val statusBroad = _binding.mainStatusBroad
+        val menuRoot = _binding.mainMenuRoot
         statusBroad.setOnClickListener {
-            // 尝试检查权限
+            if (connecting) {
+                this.toastLong("请稍等...")
+                return@setOnClickListener
+            }
+            connecting = true
+            // 先切换ui状态
             statusBroad.changeStateTo(StatusBroad.State.CONNECTING)
+            // 尝试检查权限
             mPermissionResult.launch(REQUEST_PERMISSIONS.toTypedArray())
         }
+        menuRoot.addView(MainMenuItem(this).apply {
+            setTitle("账号")
+            setIcon(resources.getDrawable(R.drawable.ic_user, null))
+        })
+        menuRoot.addView(MainMenuItem(this).apply {
+            setTitle("关于")
+            setIcon(resources.getDrawable(R.drawable.ic_about, null))
+        })
     }
 
     private fun immersionNavigationBar() {
