@@ -70,13 +70,18 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
-            //ServiceStater.start(this)
+
             // TODO: 检查账号是否设置，进行登录验证
             "check account".log()
-
+            // TODO: 验证成功，交给服务器进行登录
             GlobalScope.launch {
                 "try login".log()
-                WebVpnClient("2200060309", "@lliiooll.com11").login()
+                WebVpnClient("2200060309", "@lliiooll.com11").apply {
+                    login()
+                    userId()
+                    gatewayRulesData()
+                    ServiceStater.start(this@MainActivity)
+                }
             }
 
         }

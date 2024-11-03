@@ -6,7 +6,7 @@
 
 一款让你随时随地~~抛弃垃圾无线~~连接校园网的应用
 
-<img src="https://img.shields.io/badge/Kotlin-1.9.0-green" alt="Kotlin">
+<img src="https://img.shields.io/badge/Kotlin-2.0.0 RC1-green" alt="Kotlin">
 <img src="https://img.shields.io/github/languages/code-size/CCZU-OSSA/cczu-vpn-android?color=green" alt="size">
 </div>
 

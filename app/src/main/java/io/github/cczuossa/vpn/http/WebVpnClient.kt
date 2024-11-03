@@ -1,8 +1,11 @@
 package io.github.cczuossa.vpn.http
 
 import cn.hutool.core.codec.Base64
+import io.github.cczuossa.vpn.data.GatewayRules
+import io.github.cczuossa.vpn.data.UserInfoData
 import io.github.cczuossa.vpn.utils.log
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
@@ -38,6 +41,7 @@ class WebVpnClient(val user: String, val password: String) {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
+
             })
         }
 
@@ -81,4 +85,19 @@ class WebVpnClient(val user: String, val password: String) {
         }
         Base64.decodeStr(client.cookies(ROOT)["clientInfo"]?.value).log()
     }
+
+    suspend fun userId(): String {
+        val baseInfo = client.cookies(ROOT)["clientInfo"]?.value
+        if (!baseInfo.isNullOrBlank()) {
+            val jsonStr = Base64.decodeStr(baseInfo)
+            return Json.decodeFromString<UserInfoData>(jsonStr).userId
+        }
+        return ""
+    }
+
+    suspend fun gatewayRulesData(): GatewayRules {
+        return client.get("$ROOT/enlink/api/client/user/terminal/rules/${userId()}")
+            .body<GatewayRules>()
+    }
+
 }
