@@ -1,15 +1,10 @@
 package io.github.cczuossa.vpn.protocol
 
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import io.github.cczuossa.vpn.protocol.packet.Packet
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import io.github.cczuossa.vpn.utils.log
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.ByteBuffer
+import kotlin.concurrent.thread
 
 class EnlinkForwarder(
     fileDescriptor: FileDescriptor,
@@ -19,7 +14,7 @@ class EnlinkForwarder(
 
     private var vpnOut = FileOutputStream(fileDescriptor)// tun出口
     private var vpnIn = FileInputStream(fileDescriptor)// tun入口
-    private var desc = fileDescriptor// tun接口
+    var desc = fileDescriptor// tun接口
     private var writer = false// proxy => tun
     private var reader = false// tun => proxy
     var status = false// 全局状态
@@ -28,25 +23,19 @@ class EnlinkForwarder(
         status = true
         reader()
         writer()
-
     }
 
     private fun writer() {
         if (writer) return
-        GlobalScope.launch {
+        thread {
             // 从代理到vpn
             runCatching {
                 while (status && desc.valid()) {
                     runCatching {
                         val data = proxyIn.readData()
                         if (data.isNotEmpty()) {
-                            val packet = Packet(ByteBuffer.wrap(data))
-
+                            //val packet = Packet(ByteBuffer.wrap(data))
                             //println("read packet: $packet")
-                            Log.i(
-                                "cczu-helper",
-                                "Forwarder:  proxy => tun@$packet"
-                            )
                             vpnOut.write(data, 0, data.size)
                         }
                     }.onFailure {
@@ -54,6 +43,7 @@ class EnlinkForwarder(
                         //it.printStackTrace()
                     }
                 }
+                "status: $status,desc: ${desc.valid()}".log()
                 writer = false
             }.onFailure {
                 it.printStackTrace()
@@ -67,7 +57,7 @@ class EnlinkForwarder(
 
     private fun reader() {
         if (reader) return
-        GlobalScope.launch {
+        thread {
             runCatching {
                 // 从vpn到代理
                 // 一次读取2048字节
@@ -77,32 +67,17 @@ class EnlinkForwarder(
                     runCatching {
                         read = vpnIn.read(temp)
                         if (read > 0) {// 有读取到有效字节
-                            val packet = Packet(ByteBuffer.wrap(temp))
-
-                            if (EnlinkVPN.whitelist.contains(
-                                    packet.ip4Header.destinationAddress.toString().replace("/", "")
-                                )
-                            ) {
-                                Log.i(
-                                    "cczu-helper",
-                                    "Forwarder:  tun => proxy@$packet"
-                                )
-                                // 转发到vpn
-                                proxyOut.writeData(temp, read)
-                            } else {
-                                Log.i(
-                                    "cczu-helper",
-                                    "Forwarder:  tun => proxy@ filter ${packet.ip4Header.destinationAddress}"
-                                )
-                                //TODO: 丢弃
-                            }
-                            //println("read packet: $packet")
+                            //val packet = Packet(ByteBuffer.wrap(temp))
+                            // 转发到vpn
+                            proxyOut.writeData(temp, read)
                         }
                     }.onFailure {
                         EnlinkVPN.socket.close()
                         //it.printStackTrace()
                     }
                 }
+                "status: $status,desc: ${desc.valid()}".log()
+                reader = false
             }.onFailure {
                 it.printStackTrace()
                 reader = false

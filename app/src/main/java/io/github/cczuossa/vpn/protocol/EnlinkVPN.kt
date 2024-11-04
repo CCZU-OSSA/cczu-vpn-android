@@ -36,7 +36,6 @@ object EnlinkVPN {
             socket = sslFactory.socketFactory.createSocket()
             socket.connect(InetSocketAddress(host, port))
             // 验证并重启服务
-            auth()
         }.onFailure {
             //it.printStackTrace()
         }
@@ -50,6 +49,7 @@ object EnlinkVPN {
     ) {
         "try auth vpn: $user, $token".log()
         validator = {
+
             val output = outputStream()
             val input = inputStream()
             // 写出认证
@@ -64,11 +64,12 @@ object EnlinkVPN {
                 EnlinkTunData(address, mask)
             } else EnlinkTunData("", -1)
 
+
+
             callback.invoke(data.mask > 0, data, this)
             data
-        }
-        connect()
 
+        }
     }
 
     fun auth(): EnlinkTunData {

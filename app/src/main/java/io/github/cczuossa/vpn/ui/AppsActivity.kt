@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.zackratos.ultimatebarx.ultimatebarx.navigationBar
 import com.zackratos.ultimatebarx.ultimatebarx.statusBar
+import io.github.cczuossa.vpn.CCZUVpnAndroid
 import io.github.cczuossa.vpn.databinding.ActivityAppsBinding
 import io.github.cczuossa.vpn.ui.adapter.AppAdapter
+import io.github.cczuossa.vpn.utils.ConfigUtils
 import io.github.cczuossa.vpn.utils.ViewUtils.getStatusBarHeight
 import io.github.cczuossa.vpn.utils.ViewUtils.isDarkMode
+import io.github.cczuossa.vpn.utils.toastLong
 
 class AppsActivity : AppCompatActivity() {
 
@@ -34,15 +37,17 @@ class AppsActivity : AppCompatActivity() {
 
     private fun initView() {
         _binding.appsBack.setOnClickListener { finish() }
-        val adapter = AppAdapter(packageManager.getInstalledApplications(0))
+        val adapter = AppAdapter(
+            packageManager.getInstalledApplications(0).filter { it.packageName != CCZUVpnAndroid.APP.packageName })
+        adapter.selects.addAll(ConfigUtils.list("apps"))
         _binding.appsList.adapter = adapter
         _binding.appsList.layoutManager = LinearLayoutManager(this)
         _binding.appsAll.setOnCheckedChangeListener { view, isChecked ->
-            // TODO: 设置全选
-
+            if (isChecked) adapter.selectAll() else adapter.unselectAll()
         }
         _binding.appsSave.setOnClickListener {
-            //TODO: 保存应用列表
+            ConfigUtils.set("apps", adapter.selects)
+            toastLong("保存完毕")
         }
         _binding.appsSearch.setOnClickListener {
             //TODO: 弹出搜索框

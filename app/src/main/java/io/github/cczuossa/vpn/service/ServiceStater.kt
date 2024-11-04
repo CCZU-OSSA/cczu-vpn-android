@@ -6,6 +6,7 @@ import android.content.Context.BIND_AUTO_CREATE
 import android.content.Context.BIND_IMPORTANT
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -25,12 +26,15 @@ object ServiceStater {
         if (status) {
             // 绑定并启动服务
             val intent = Intent(activity, EnlinkVpnService::class.java)
-            activity.startService(intent)
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                activity.startForegroundService(intent)
+            }else{
+                activity.startService(intent)
+            }
             activity.bindService(
                 intent,
                 activity.connection,
-                BIND_IMPORTANT
+                BIND_AUTO_CREATE
             )
         } else {
             // 拒绝了你用什么！！ [○･｀Д´･ ○]

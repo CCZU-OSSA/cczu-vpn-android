@@ -1,9 +1,13 @@
 package io.github.cczuossa.vpn.ui
 
 import android.Manifest
+import android.R.attr.action
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
@@ -13,8 +17,10 @@ import android.widget.LinearLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.zackratos.ultimatebarx.ultimatebarx.navigationBar
 import com.zackratos.ultimatebarx.ultimatebarx.statusBar
+import io.github.cczuossa.vpn.IVpnServiceInterface
 import io.github.cczuossa.vpn.R
 import io.github.cczuossa.vpn.databinding.ActivityMainBinding
 import io.github.cczuossa.vpn.http.WebVpnClient
@@ -43,18 +49,38 @@ class MainActivity : AppCompatActivity() {
     val REQUEST_PERMISSIONS = arrayListOf(
         Manifest.permission.INTERNET,// 基础网络权限
         Manifest.permission.ACCESS_NETWORK_STATE,// 基础网络状态检查权限
-        Manifest.permission.ACCESS_WIFI_STATE// 基础wifi状态检查权限
+        Manifest.permission.ACCESS_WIFI_STATE,// 基础wifi状态检查权限
+
     )
+    val receiverFilter = "io.github.cczuossa.vpn.connected"
+    val receiverFilter1 = "io.github.cczuossa.vpn.disconnected"
+    val receiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                _binding.mainStatusBroad.post {
+                    if (intent!!.action == receiverFilter) {
+                        connecting = true
+                        _binding.mainStatusBroad.changeStateTo(StatusBroad.State.START)
+                        _binding.mainStatusBroad.setTitle("连接成功")
+                        _binding.mainStatusBroad.setSubTitle("已可以正常访问校园网")
+                    } else {
+                        connecting = false
+                        _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                        _binding.mainStatusBroad.setTitle("错误")
+                        _binding.mainStatusBroad.setSubTitle("VPN服务初始化失败")
+                    }
+                }
+            }
+        }
+    }
 
     val connection by lazy {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 "service connected".log()
-                // if (binder is EnlinkVpnService.EnlinkVpnServiceBinder) {
-                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.START)
-                _binding.mainStatusBroad.setTitle("连接成功")
-                _binding.mainStatusBroad.setSubTitle("已可以正常访问校园网")
-                //}
+                IVpnServiceInterface.Stub.asInterface(binder).connect()
+
+                _binding.mainStatusBroad.setSubTitle("尝试连接到vpn...")
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
@@ -96,6 +122,11 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {// 安卓9及其以上
             // 添加前台服务权限
             REQUEST_PERMISSIONS.add(Manifest.permission.FOREGROUND_SERVICE)
+
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {// 安卓11及其以上
+            // 查询全部应用权限
+            REQUEST_PERMISSIONS.add(Manifest.permission.QUERY_ALL_PACKAGES)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {// 安卓13及其以上
             // 添加通知权限
@@ -105,12 +136,24 @@ class MainActivity : AppCompatActivity() {
             // 添加特殊前台服务权限
             REQUEST_PERMISSIONS.add(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE)
         }
+        runCatching {
+            if (packageManager.getPermissionInfo("com.android.permission.GET_INSTALLED_APPS", 0) != null) {
+                // miui特殊适配
+                REQUEST_PERMISSIONS.add("com.android.permission.GET_INSTALLED_APPS")
+            }
+        }
+        // 注册广播接收器
+        registerReceiver(receiver, IntentFilter().apply {
+            addAction(receiverFilter)
+            addAction(receiverFilter1)
+        }, ContextCompat.RECEIVER_EXPORTED)
         mActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 ServiceStater.prepare(this, true)
             }
         }
         mPermissionResult = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            "permissions: $it".log()
             it.forEach {
                 if (!it.value) {
                     // 一个都不能拒绝哦 (✺ω✺)
@@ -129,6 +172,9 @@ class MainActivity : AppCompatActivity() {
                         login()
                         if (userId().isNotBlank()) {
                             "try start service".log()
+                            _binding.mainStatusBroad.post {
+                                _binding.mainStatusBroad.setSubTitle("尝试启动服务...")
+                            }
                             ServiceStater.start(this@MainActivity)
                             delay(1000)
                         } else {

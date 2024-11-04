@@ -34,7 +34,7 @@ class WebVpnClient(val user: String, val password: String) {
             level = LogLevel.ALL
             logger = object : Logger {
                 override fun log(message: String) {
-                    message.log()
+                    //message.log()
                 }
             }
         }
@@ -56,10 +56,9 @@ class WebVpnClient(val user: String, val password: String) {
         }
         "check hidden values first".log()
         val req = client.get(ROOT)
-
         val html = Jsoup.parse(req.bodyAsText())
-        val url = html.getElementById("fm1")!!
-            .attr("action")
+        val fm1 = html.getElementById("fm1") ?: return@withContext
+        val url = fm1.attr("action")
         html.getElementsByClass("form-actions")
             .first()!!
             .getElementsByTag("input")
@@ -99,5 +98,6 @@ class WebVpnClient(val user: String, val password: String) {
         return client.get("$ROOT/enlink/api/client/user/terminal/rules/${userId()}")
             .body<GatewayRules>()
     }
+
 
 }

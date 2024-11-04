@@ -43,21 +43,7 @@ class StatusBroad : LinearLayout {
             State.START -> {
                 icon.repeatCount = 0
                 icon.speed = 2f
-                when (lastState) {
-                    State.CONNECTING -> {
-                        icon.setAnimation("lottie/loading2success.json")
-                    }
-
-                    State.START -> {
-                    }
-
-                    State.STOP -> {
-
-                    }
-
-                    State.ERROR -> {
-                    }
-                }
+                icon.setAnimation("lottie/loading2success.json")
                 icon.playAnimation()
             }
 
@@ -101,22 +87,7 @@ class StatusBroad : LinearLayout {
             State.ERROR -> {
                 icon.repeatCount = 0
                 icon.speed = 2f
-                when (lastState) {
-                    State.CONNECTING -> {
-                        icon.setAnimation("lottie/loading2error.json")
-                    }
-
-                    State.START -> {
-                        //TODO: icon.setAnimation("lottie/start2error.json")
-                    }
-
-                    State.STOP -> {
-
-                    }
-
-                    State.ERROR -> {
-                    }
-                }
+                icon.setAnimation("lottie/loading2error.json")
                 icon.playAnimation()
             }
         }

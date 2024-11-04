@@ -21,4 +21,12 @@ object ConfigUtils {
         return sp.getString(key, "")!!
     }
 
+    fun list(key: String): Set<String> {
+        return sp.getStringSet(key, hashSetOf<String>())!!
+    }
+
+    fun set(key: String, sets: HashSet<String>) {
+        sp.edit().putStringSet(key, sets).apply()
+    }
+
 }
