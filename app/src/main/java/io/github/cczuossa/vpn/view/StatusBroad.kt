@@ -40,8 +40,27 @@ class StatusBroad : LinearLayout {
         "change $lastState to $state".log()
         icon.removeAllAnimatorListeners()
         when (state) {
+            State.START -> {
+                icon.repeatCount = 0
+                icon.speed = 2f
+                when (lastState) {
+                    State.CONNECTING -> {
+                        icon.setAnimation("lottie/loading2success.json")
+                    }
 
-            State.START -> {}
+                    State.START -> {
+                    }
+
+                    State.STOP -> {
+
+                    }
+
+                    State.ERROR -> {
+                    }
+                }
+                icon.playAnimation()
+            }
+
             State.STOP -> {}
             State.CONNECTING -> {
                 icon.repeatCount = 0

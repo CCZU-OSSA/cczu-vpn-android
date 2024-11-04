@@ -53,6 +53,7 @@ object EnlinkVPN {
             val output = outputStream()
             val input = inputStream()
             // 写出认证
+            "tun write auth".log()
             output.writeAuth(user, token)
             val data = if (input.authStatus()) {
                 val address = input.virtualAddress()

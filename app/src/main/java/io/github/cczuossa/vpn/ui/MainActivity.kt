@@ -49,17 +49,34 @@ class MainActivity : AppCompatActivity() {
     val connection by lazy {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                if (binder is EnlinkVpnService.EnlinkVpnServiceBinder) {
-                    _binding.mainStatusBroad.changeStateTo(StatusBroad.State.START)
-                    _binding.mainStatusBroad.setTitle("连接成功")
-                    _binding.mainStatusBroad.setSubTitle("已可以正常访问校园网")
-                }
+                "service connected".log()
+                // if (binder is EnlinkVpnService.EnlinkVpnServiceBinder) {
+                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.START)
+                _binding.mainStatusBroad.setTitle("连接成功")
+                _binding.mainStatusBroad.setSubTitle("已可以正常访问校园网")
+                //}
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
+                "service disconnected".log()
+                connecting = false
                 _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
                 _binding.mainStatusBroad.setTitle("错误")
                 _binding.mainStatusBroad.setSubTitle("VPN服务断开")
+                bindService(Intent(this@MainActivity, EnlinkVpnService::class.java), this, BIND_IMPORTANT)
+            }
+
+            override fun onBindingDied(name: ComponentName?) {
+                "bind died".log()
+                connecting = false
+                _binding.mainStatusBroad.changeStateTo(StatusBroad.State.ERROR)
+                _binding.mainStatusBroad.setTitle("错误")
+                _binding.mainStatusBroad.setSubTitle("VPN服务断开")
+                bindService(Intent(this@MainActivity, EnlinkVpnService::class.java), this, BIND_IMPORTANT)
+            }
+
+            override fun onNullBinding(name: ComponentName?) {
+                "bind null".log()
             }
 
         }
@@ -166,7 +183,9 @@ class MainActivity : AppCompatActivity() {
         menuRoot.addView(MainMenuItem(this).apply {
             setTitle("配置应用")
             setIcon(resources.getDrawable(R.drawable.ic_apps, null))
-            // TODO: 获取全部应用，在代理中使用
+            setOnClickListener {
+                jump(AppsActivity::class.java)
+            }
         })
         menuRoot.addView(MainMenuItem(this).apply {
             setTitle("关于")

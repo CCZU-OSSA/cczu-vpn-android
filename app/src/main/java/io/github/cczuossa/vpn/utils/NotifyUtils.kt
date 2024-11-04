@@ -28,7 +28,7 @@ object NotifyUtils {
                 NotificationChannel("vpn_service_notify", "VPN服务通知", NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.notify(0, notification)
+        //notificationManager.notify(0, notification)
         callback.invoke(notification)
     }
 

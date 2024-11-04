@@ -7,6 +7,7 @@ import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Binder
 import android.os.Build
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import io.github.cczuossa.vpn.data.EnlinkTunData
 import io.github.cczuossa.vpn.http.WebVpnClient
@@ -43,22 +44,28 @@ class EnlinkVpnService : VpnService() {
             }
             GlobalScope.launch {
                 // TODO: 启动断线重连
-                webVpnClient.login()
-                if (webVpnClient.userId().isNotBlank()) {
-                    EnlinkVPN.init(webVpnClient.user, webVpnClient.gatewayRulesData().data.token) { status, data, vpn ->
-                        protect(vpn.socket)
-                        val tun = setup(data)
-                        forwarder = EnlinkForwarder(tun!!.fileDescriptor, vpn.inputStream(), vpn.outputStream())
-                        forwarder.start()
-                    }
-                    EnlinkVPN.auth()
-                }
+                this@EnlinkVpnService.connect()
             }
         }
         return START_NOT_STICKY
     }
 
+    private suspend fun connect() {
+        webVpnClient.login()
+        if (webVpnClient.userId().isNotBlank()) {
+            EnlinkVPN.init(webVpnClient.user, webVpnClient.gatewayRulesData().data.token) { status, data, vpn ->
+                protect(vpn.socket)
+                data.dns.add("211.65.64.65")
+                // TODO: 添加设置的应用
+                val tun = setup(data)
+                forwarder = EnlinkForwarder(tun!!.fileDescriptor, vpn.inputStream(), vpn.outputStream())
+                forwarder.start()
+            }
+        }
+    }
+
     private fun setup(data: EnlinkTunData): ParcelFileDescriptor? {
+        "tun data: $data".log()
         return Builder()
             .addAddress(data.address, data.mask)
             .setConfigureIntent(intent)
@@ -78,6 +85,10 @@ class EnlinkVpnService : VpnService() {
             .establish()
     }
 
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return EnlinkVpnServiceBinder(this)
+    }
 
     open class EnlinkVpnServiceBinder(
         val service: EnlinkVpnService
