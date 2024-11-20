@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -32,11 +32,12 @@ fun HomePage(navController: NavController = rememberNavController()) {
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
             // 标题
             HomeTitle()
             // 状态框
-            StatusBroad(Status.START, SubStatus.FINISHED)
+            StatusBroad()
             // 主菜单
             HomeMenu(Modifier.weight(1f), navController)
         }
@@ -48,16 +49,25 @@ fun HomePage(navController: NavController = rememberNavController()) {
 fun HomeMenu(modifier: Modifier, navController: NavController) {
     Column(
         modifier = modifier.fillMaxWidth()
-            .padding(top = 40.dp)
+            .padding(top = 40.dp, bottom = 60.dp)
+
     ) {
 
         //Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color.LightGray))
-        HomeMenuItem("123", R.drawable.ic_launcher_background) {
-            navController.navigate("123")
+        HomeMenuItem("账号管理", R.drawable.ic_account) {
+            navController.navigate("account")
         }
 
-        HomeMenuItem("456", R.drawable.ic_launcher_background) {
-            navController.navigate("456")
+        HomeMenuItem("代理应用", R.drawable.ic_apps) {
+            navController.navigate("apps")
+        }
+
+        HomeMenuItem("设置", R.drawable.ic_settings) {
+            navController.navigate("settings")
+        }
+
+        HomeMenuItem("关于", R.drawable.ic_about) {
+            navController.navigate("about")
         }
 
     }
@@ -69,7 +79,7 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 30.dp)
+            .padding(horizontal = 45.dp)
             .clickable {
                 clickable.invoke()
             }
@@ -88,7 +98,9 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
 
 
 @Composable
-fun StatusBroad(status: Status, sub: SubStatus) {
+fun StatusBroad() {
+    var status by remember { mutableStateOf(HomePageActions.STATUS) }
+    var subStatus by remember { mutableStateOf(HomePageActions.SUB_STATUS) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -99,6 +111,9 @@ fun StatusBroad(status: Status, sub: SubStatus) {
             .padding(top = 30.dp)
             .shadow(elevation = 5.dp, shape = RoundedCornerShape(10.dp))
             .background(color = Color(0xffc3cfe2), shape = RoundedCornerShape(10.dp))
+            .clickable {
+
+            }
     ) {
         // 替换为lottie
         Image(
@@ -114,7 +129,7 @@ fun StatusBroad(status: Status, sub: SubStatus) {
         ) {
             Text(text = HomePageActions.invokeStatusTitle(status), fontSize = 16.sp)
             Text(
-                text = HomePageActions.invokeSubStatusTitle(sub),
+                text = HomePageActions.invokeSubStatusTitle(subStatus),
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 5.dp)
             )
@@ -149,7 +164,8 @@ fun HomeTitle() {
 
 
 object HomePageActions {
-
+    var STATUS = Status.START
+    var SUB_STATUS = SubStatus.FINISHED
     fun invokeStatusTitle(status: Status): String {
         return when (status) {
             Status.STOP -> "已停止"

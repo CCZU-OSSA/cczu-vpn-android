@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.cczuossa.vpn.android.page.AccountPage
 import io.github.cczuossa.vpn.android.page.HomePage
 import io.github.cczuossa.vpn.android.ui.theme.AppTheme
 
@@ -27,6 +28,18 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("home") {
                         HomePage(navController)
+                    }
+                    composable("account") {
+                        AccountPage(navController)
+                    }
+                    composable("apps") {
+
+                    }
+                    composable("settings") {
+
+                    }
+                    composable("about") {
+
                     }
                 }
 
