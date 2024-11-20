@@ -1,5 +1,6 @@
 package io.github.cczuossa.vpn.android.page
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,14 +13,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.R
 
-class BasePage {
-}
-
 
 @Preview
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ActionBar(
+fun BasePage(
     navController: NavController = rememberNavController(),
     title: String = "标题",
     actions: @Composable () -> Unit = {},
@@ -55,4 +53,20 @@ fun ActionBar(
             content.invoke()
         }
     }
+}
+
+@Composable
+fun ActionButton(@DrawableRes icon: Int, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Image(
+            painter = painterResource(id = icon),
+            "action button $icon",
+            modifier = Modifier.padding(4.dp)
+                .size(33.dp)
+                .padding(end = 5.dp)
+        )
+    }
+}
+
+object BasePageActions {
 }

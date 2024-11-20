@@ -20,17 +20,9 @@ import io.github.cczuossa.vpn.android.R
 fun AccountPage(navController: NavController = rememberNavController()) {
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
-    ActionBar(navController, "账号设置", actions = {
-        IconButton(onClick = {
+    BasePage(navController, "账号设置", actions = {
+        ActionButton(R.drawable.ic_check) {
             //TODO: 储存 user 和 pass
-        }) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_check),
-                "record account",
-                modifier = Modifier.padding(4.dp)
-                    .size(33.dp)
-                    .padding(end = 5.dp)
-            )
         }
 
     }) {

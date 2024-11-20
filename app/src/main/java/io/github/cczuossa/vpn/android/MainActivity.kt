@@ -9,8 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.cczuossa.vpn.android.page.AboutPage
 import io.github.cczuossa.vpn.android.page.AccountPage
+import io.github.cczuossa.vpn.android.page.AppsPage
 import io.github.cczuossa.vpn.android.page.HomePage
+import io.github.cczuossa.vpn.android.page.SettingsPage
 import io.github.cczuossa.vpn.android.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,13 +36,13 @@ class MainActivity : ComponentActivity() {
                         AccountPage(navController)
                     }
                     composable("apps") {
-
+                        AppsPage(navController)
                     }
                     composable("settings") {
-
+                        SettingsPage(navController)
                     }
                     composable("about") {
-
+                        AboutPage(navController)
                     }
                 }
 
