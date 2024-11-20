@@ -10,14 +10,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.page.HomePage
-import io.github.cczuossa.vpn.android.ui.theme.CczuvpnandroidTheme
+import io.github.cczuossa.vpn.android.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CczuvpnandroidTheme {
+            AppTheme {
                 // 导航页面
                 val navController = rememberNavController()
                 NavHost(
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     composable("home") {
-                        HomePage()
+                        HomePage(navController)
                     }
                 }
 
