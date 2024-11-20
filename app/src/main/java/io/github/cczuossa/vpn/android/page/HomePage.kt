@@ -53,7 +53,6 @@ fun HomeMenu(modifier: Modifier, navController: NavController) {
             .padding(top = 40.dp, bottom = 60.dp)
 
     ) {
-
         //Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color.LightGray))
         HomeMenuItem("账号管理", R.drawable.ic_account) {
             navController.navigate("account")
@@ -77,23 +76,27 @@ fun HomeMenu(modifier: Modifier, navController: NavController) {
 @Composable
 fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = {}) {
     Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 45.dp)
             .clickable {
                 clickable.invoke()
             }
     ) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = "menu icon $title",
-            modifier = Modifier.size(26.dp)
-        )
-        Text(
-            text = title, modifier = Modifier.padding(start = 15.dp)
-                .padding(vertical = 13.dp)
-        )
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 45.dp)
+        ) {
+            Image(
+                painter = painterResource(icon),
+                contentDescription = "menu icon $title",
+                modifier = Modifier.size(26.dp)
+            )
+            Text(
+                text = title, modifier = Modifier.padding(start = 15.dp)
+                    .padding(vertical = 13.dp)
+            )
+        }
     }
 }
 
