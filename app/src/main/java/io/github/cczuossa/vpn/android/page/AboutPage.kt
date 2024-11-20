@@ -61,7 +61,7 @@ fun AboutPage(navController: NavController = rememberNavController()) {
                 ) {
                     // Github 小章鱼
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.ic_github),
                         contentDescription = "github",
                         modifier = Modifier.size(20.dp)
                     )
@@ -70,7 +70,8 @@ fun AboutPage(navController: NavController = rememberNavController()) {
                         text = "Github",
                         fontSize = 15.sp,
                         textDecoration = TextDecoration.Underline,
-                        color = Color.Blue
+                        color = Color.Blue,
+                        modifier =  Modifier.padding(start = 3.dp)
                     )
                 }
             }

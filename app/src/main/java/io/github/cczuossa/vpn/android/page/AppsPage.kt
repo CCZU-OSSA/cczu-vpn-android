@@ -40,13 +40,13 @@ fun AppsPage(navController: NavController = rememberNavController()) {
                 }
             }
             // 搜索
-            ActionButton(R.drawable.ic_check) {
+            ActionButton(R.drawable.ic_search) {
                 //TODO: 展开搜索框
                 searchBarOpen = !searchBarOpen
             }
 
             // 全选
-            ActionButton(R.drawable.ic_check) {
+            ActionButton(R.drawable.ic_check_all) {
                 //TODO: 全选应用
             }
 
