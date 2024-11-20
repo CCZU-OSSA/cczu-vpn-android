@@ -20,14 +20,14 @@ import io.github.cczuossa.vpn.android.R
 fun BasePage(
     navController: NavController = rememberNavController(),
     title: String = "标题",
+    titleStyle: @Composable () -> Unit = { Text(text = title) },
     actions: @Composable () -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = title)
-            }, navigationIcon = {
+            TopAppBar(
+                title = titleStyle, navigationIcon = {
                 IconButton(
                     onClick = {
                         navController.popBackStack()

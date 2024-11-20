@@ -18,7 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,11 +72,23 @@ fun AboutPage(navController: NavController = rememberNavController()) {
                     )
                     // Github 文字
                     Text(
-                        text = "Github",
+                        text = buildAnnotatedString {
+                            withLink(
+                                LinkAnnotation.Url(
+                                    "https://github.com/CCZU-OSSA/cczu-vpn-android",
+                                    TextLinkStyles(
+                                        style = SpanStyle(
+                                            color = Color.Blue,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    )
+                                )
+                            ) {
+                                append("Github")
+                            }
+                        },
                         fontSize = 15.sp,
-                        textDecoration = TextDecoration.Underline,
-                        color = Color.Blue,
-                        modifier =  Modifier.padding(start = 3.dp)
+                        modifier = Modifier.padding(start = 3.dp)
                     )
                 }
             }

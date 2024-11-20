@@ -1,11 +1,25 @@
 package io.github.cczuossa.vpn.android.page
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.animateIntOffset
+import androidx.compose.animation.core.animateIntOffsetAsState
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -14,9 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -126,6 +144,7 @@ fun StatusBroad() {
                     HomePageActions.SUB_STATUS.value = SubStatus.INIT
                     //TODO: 启动服务
 
+                    // TODO: 测试代码，记得删除
                     GlobalScope.launch(Dispatchers.IO) {
                         delay(1000)
                         HomePageActions.SUB_STATUS.value = SubStatus.STARTING
@@ -155,13 +174,28 @@ fun StatusBroad() {
             modifier = Modifier.padding(end = 30.dp, start = 15.dp)
                 .weight(0.8f)
         ) {
-            Text(text = HomePageActions.invokeStatusTitle(status), fontSize = 16.sp)
-            Text(
-                text = HomePageActions.invokeSubStatusTitle(subStatus),
-                fontSize = 13.sp,
-                modifier = Modifier.padding(top = 5.dp)
+            AnimatedText(HomePageActions.invokeStatusTitle(status), 16.sp)
+            AnimatedText(HomePageActions.invokeSubStatusTitle(subStatus), 13.sp, Modifier.padding(top = 5.dp))
+        }
+    }
+}
+
+@Composable
+fun AnimatedText(text: String, fontSize: TextUnit, modifier: Modifier = Modifier) {
+    AnimatedContent(
+        text,
+        transitionSpec = {
+            (fadeIn() + slideInHorizontally() togetherWith fadeOut() + slideOutHorizontally()).using(
+                SizeTransform(clip = false)
             )
         }
+    ) {
+        Text(
+            text = it,
+            fontSize = fontSize,
+            style = LocalTextStyle.current.copy(textMotion = TextMotion.Animated),
+            modifier = modifier
+        )
     }
 }
 
@@ -210,7 +244,7 @@ object HomePageActions {
             SubStatus.AUTH -> "正在验证账号密码..."
             SubStatus.STARTING -> "启动服务中..."
             SubStatus.CONNECTING -> "正在连接到VPN..."
-            SubStatus.FINISHED -> "连接完毕"
+            SubStatus.FINISHED -> "连接完毕，点击停止"
             SubStatus.AUTHERROR -> "账号或密码错误"
             SubStatus.SERVICEERROR -> "无法启动VPN服务"
             SubStatus.NETERROR -> "网络异常"
