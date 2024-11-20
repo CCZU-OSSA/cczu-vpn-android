@@ -1,26 +1,28 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    kotlin("plugin.serialization") version "1.9.24"
 }
 
 android {
-    namespace = "io.github.cczuossa.vpn"
+    namespace = "io.github.cczuossa.vpn.android"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "io.github.cczuossa.vpn"
+        applicationId = "io.github.cczuossa.vpn.android"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -32,38 +34,35 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-        viewBinding = true
-        aidl = true
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
-            excludes += "META-INF/INDEX.LIST"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
 }
 
 dependencies {
+
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.ultimatebarx)// 状态栏
-    implementation(libs.lottie)// 动画
-    implementation(libs.gson)// json
-    implementation(libs.ktor.client.core)// http请求
-    implementation(libs.ktor.client.android)// http请求
-    implementation(libs.ktor.client.logging)// http请求
-    implementation(libs.ktor.client.okhttp)// http请求
-    implementation(libs.ktor.client.serialization)// ktor序列化
-    implementation(libs.ktor.client.content.negotiation)// ktor序列化
-    implementation(libs.kotlinx.serialization.json)// ktor序列化
-    implementation(libs.jsoup)// html解析
-    implementation(libs.hutool.http)// http库
-    implementation(libs.hutool.crypto)// 加/解密
-    implementation(libs.ktor.client.cio.jvm)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.navigation.compose)
+    implementation(libs.android.lottie.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
