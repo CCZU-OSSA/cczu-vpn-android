@@ -12,7 +12,6 @@ import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.page.HomePage
 import io.github.cczuossa.vpn.android.ui.theme.CczuvpnandroidTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
