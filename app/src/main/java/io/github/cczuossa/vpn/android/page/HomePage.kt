@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -23,6 +24,10 @@ import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.R
 import io.github.cczuossa.vpn.android.data.Status
 import io.github.cczuossa.vpn.android.data.SubStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -103,8 +108,8 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
 
 @Composable
 fun StatusBroad() {
-    var status by remember { mutableStateOf(HomePageActions.STATUS) }
-    var subStatus by remember { mutableStateOf(HomePageActions.SUB_STATUS) }
+    var status by remember { HomePageActions.STATUS }
+    var subStatus by remember { HomePageActions.SUB_STATUS }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -116,9 +121,28 @@ fun StatusBroad() {
             .shadow(elevation = 5.dp, shape = RoundedCornerShape(10.dp))
             .background(color = Color(0xffc3cfe2), shape = RoundedCornerShape(10.dp))
             .clickable {
+                if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
+                    HomePageActions.STATUS.value = Status.CONNECTING
+                    HomePageActions.SUB_STATUS.value = SubStatus.INIT
+                    //TODO: 启动服务
+
+                    GlobalScope.launch(Dispatchers.IO) {
+                        delay(1000)
+                        HomePageActions.SUB_STATUS.value = SubStatus.STARTING
+                        delay(1000)
+                        HomePageActions.SUB_STATUS.value = SubStatus.AUTH
+                        delay(1000)
+                        HomePageActions.SUB_STATUS.value = SubStatus.CONNECTING
+                        delay(1000)
+                        HomePageActions.SUB_STATUS.value = SubStatus.FINISHED
+                        HomePageActions.STATUS.value = Status.START
+                    }
+
+                }
 
             }
     ) {
+
         // 替换为lottie
         Image(
             painter = painterResource(R.drawable.ic_launcher_background),
@@ -168,11 +192,12 @@ fun HomeTitle() {
 
 
 object HomePageActions {
-    var STATUS = Status.START
-    var SUB_STATUS = SubStatus.FINISHED
+
+    var STATUS = mutableStateOf(Status.STOP)
+    var SUB_STATUS = mutableStateOf(SubStatus.STOP)
     fun invokeStatusTitle(status: Status): String {
         return when (status) {
-            Status.STOP -> "已停止"
+            Status.STOP -> "未启动"
             Status.START -> "运行中"
             Status.CONNECTING -> "连接中"
             Status.ERROR -> "出错了"
@@ -190,6 +215,7 @@ object HomePageActions {
             SubStatus.SERVICEERROR -> "无法启动VPN服务"
             SubStatus.NETERROR -> "网络异常"
             SubStatus.ERROR -> "未知的错误"
+            SubStatus.STOP -> "请点击此处启动"
         }
     }
 }

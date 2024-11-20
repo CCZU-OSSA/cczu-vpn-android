@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.R
@@ -66,7 +68,19 @@ fun AppsPage(navController: NavController = rememberNavController()) {
             //packageInfo.packageName,
             checked = checkedApps.contains(packageName),
         ) {
-            //if (checkedApps.contains(packageName)) checkedApps.remove(packageName) else checkedApps.add(packageName)
+            checkedApps =
+                hashSetOf<String>().apply {
+                    if (checkedApps.contains(packageName)) {
+                        addAll(checkedApps.filter {
+                            it != packageName
+                        })
+                    } else {
+                        addAll(checkedApps)
+                        add(packageName)
+                    }
+
+                }
+
         }
     }
 }
@@ -98,7 +112,8 @@ fun AppsItem(
         Text(
             name,
             modifier = Modifier.weight(1f)
-                .padding(18.dp)
+                .padding(18.dp),
+            fontSize = 20.sp,
         )
 
         // 复选框

@@ -8,6 +8,7 @@ enum class Status {
 }
 
 enum class SubStatus {
+    STOP,// 停止
     INIT,// 初始化
     AUTH,// 验证账号密码
     STARTING,// 启动服务中
