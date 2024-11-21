@@ -1,6 +1,9 @@
 package io.github.cczuossa.vpn.android.page
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -24,47 +27,48 @@ import io.github.cczuossa.vpn.android.R
 @Preview
 @Composable
 fun AppsPage(navController: NavController = rememberNavController()) {
-    var searchBarOpen by remember { mutableStateOf(true) }
+    var searchBarOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var checkedApps by remember { mutableStateOf(hashSetOf<String>()) }
-    //TODO: 状态切换动画: 标题与icon渐变消失，搜索框从图标展开
     BasePage(
         navController,
-        titleStyle = {
-            // TODO: 搜索条从左边缩回去了
-            AnimatedVisibility(
-                !searchBarOpen,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier.animateContentSize(),
-
+        title = "代理应用",
+        actions = {
+            Surface {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxHeight()
+                        .width(120.dp)
                 ) {
-                Text("代理应用")
-            }
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+                    AnimatedVisibility(
+                        searchBarOpen,
+                        enter = expandHorizontally(expandFrom = Alignment.Start),
+                        exit = fadeOut(),
+                        modifier = Modifier.animateContentSize()
 
-                AnimatedVisibility(
-                    searchBarOpen,
-                    enter = expandHorizontally() + fadeIn(),
-                    exit = shrinkHorizontally() + fadeOut(),
-                    modifier = Modifier.animateContentSize(),
-                ) {
-                    AppSearchBar(searchText) {
-                        searchText = it
+
+                    ) {
+                        AppSearchBar(searchText) {
+                            searchText = it
+                        }
                     }
                 }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.padding(start = 8.dp).fillMaxHeight().width(120.dp)
+                ) {
+                    // 搜索
+                    ActionButton(R.drawable.ic_search) {
+                        //TODO: 展开搜索框
+                        searchBarOpen = !searchBarOpen
+                    }
+                }
+
+
             }
 
-        },
-        actions = {
-// 搜索
-            ActionButton(R.drawable.ic_search) {
-                //TODO: 展开搜索框
-                searchBarOpen = !searchBarOpen
-            }
 
             // 全选
             ActionButton(R.drawable.ic_check_all) {
@@ -79,6 +83,7 @@ fun AppsPage(navController: NavController = rememberNavController()) {
 
         })
     {
+        //TODO: 根据searchText筛选应用
         // 应用列表
         //val packageInfo = LocalContext.current.packageManager.getApplicationInfo(LocalContext.current.packageName, 0)
         val packageName = "test.app"
@@ -154,8 +159,8 @@ fun AppSearchBar(searchText: String = "", onValueChanged: (String) -> Unit) {
 
     BasicTextField(
         value = searchText,
-        modifier = Modifier.height(30.dp)
-            .fillMaxWidth(),
+        modifier = Modifier.height(34.dp)
+            .width(120.dp),
         onValueChange = onValueChanged,
         decorationBox = {
             TextFieldDefaults.DecorationBox(
@@ -170,7 +175,7 @@ fun AppSearchBar(searchText: String = "", onValueChanged: (String) -> Unit) {
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 shape = MaterialTheme.shapes.medium,
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp)
+                contentPadding = PaddingValues(top = 2.dp, bottom = 2.dp, start = 16.dp, end = 33.dp)
             )
         }
     )
