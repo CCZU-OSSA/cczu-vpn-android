@@ -3,7 +3,9 @@ package io.github.cczuossa.vpn.android.data
 enum class Status {
     STOP,// 停止
     START,// 启动
+    STARTING,// 启动中
     CONNECTING,// 连接中
+    FINISHING,// 过渡中
     ERROR,// 错误
 }
 

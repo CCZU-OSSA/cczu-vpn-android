@@ -1,5 +1,6 @@
 package io.github.cczuossa.vpn.android.page
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
@@ -24,6 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCancellationBehavior
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieAnimatable
+import com.airbnb.lottie.compose.rememberLottieComposition
 import io.github.cczuossa.vpn.android.R
 import io.github.cczuossa.vpn.android.data.Status
 import io.github.cczuossa.vpn.android.data.SubStatus
@@ -113,6 +122,31 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
 fun StatusBroad() {
     var status by remember { HomePageActions.STATUS }
     var subStatus by remember { HomePageActions.SUB_STATUS }
+    val lottie by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.stop2success))
+
+    val progress by animateLottieCompositionAsState(
+        composition = lottie,
+        isPlaying = status != Status.STOP || HomePageActions.STOP_ANIM,
+        speed = 1.5f,
+        iterations = if (status == Status.CONNECTING) LottieConstants.IterateForever else 1,
+        cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
+        restartOnPlay = true,
+        clipSpec =
+            when (status) {
+                Status.STOP, Status.ERROR, Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
+                Status.FINISHING, Status.CONNECTING -> LottieClipSpec.Progress(0.25f, 0.75f)
+                Status.START -> LottieClipSpec.Progress(0.75f, 1f)
+            }
+    )
+
+    if (progress >= 0.24f && status == Status.STARTING) {
+        HomePageActions.changeStatusTo(Status.CONNECTING)
+    }
+    if (progress >= 0.74f && status == Status.FINISHING) {
+        HomePageActions.changeStatusTo(Status.START)
+    }
+    HomePageActions.STOP_ANIM = progress >= 1
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -122,35 +156,37 @@ fun StatusBroad() {
             .padding(horizontal = 30.dp)
             .padding(top = 30.dp)
             .shadow(elevation = 5.dp, shape = RoundedCornerShape(10.dp))
+            //TODO: 根据状态改变背景颜色
             .background(color = Color(0xffc3cfe2), shape = RoundedCornerShape(10.dp))
             .clickable {
-                if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
-                    HomePageActions.STATUS.value = Status.CONNECTING
-                    HomePageActions.SUB_STATUS.value = SubStatus.INIT
-                    //TODO: 启动服务
+                //if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
+                HomePageActions.changeStatusTo(Status.STARTING)
+                HomePageActions.SUB_STATUS.value = SubStatus.INIT
+                //TODO: 启动服务
 
-                    // TODO: 测试代码，记得删除
-                    GlobalScope.launch(Dispatchers.IO) {
-                        delay(1000)
-                        HomePageActions.SUB_STATUS.value = SubStatus.STARTING
-                        delay(1000)
-                        HomePageActions.SUB_STATUS.value = SubStatus.AUTH
-                        delay(1000)
-                        HomePageActions.SUB_STATUS.value = SubStatus.CONNECTING
-                        delay(1000)
-                        HomePageActions.SUB_STATUS.value = SubStatus.FINISHED
-                        HomePageActions.STATUS.value = Status.START
-                    }
-
+                // TODO: 测试代码，记得删除
+                GlobalScope.launch(Dispatchers.IO) {
+                    delay(2000)
+                    HomePageActions.SUB_STATUS.value = SubStatus.STARTING
+                    delay(2000)
+                    HomePageActions.SUB_STATUS.value = SubStatus.AUTH
+                    delay(2000)
+                    HomePageActions.SUB_STATUS.value = SubStatus.CONNECTING
+                    delay(2000)
+                    HomePageActions.SUB_STATUS.value = SubStatus.FINISHED
+                    HomePageActions.changeStatusTo(Status.FINISHING)
                 }
+
 
             }
     ) {
 
-        // 替换为lottie
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_background),
-            contentDescription = "status",
+        //TODO: 替换为lottie
+        LottieAnimation(
+            composition = lottie,
+            progress = {
+                progress
+            },
             modifier = Modifier.size(26.dp)
                 .padding(start = 30.dp)
                 .weight(0.2f)
@@ -209,17 +245,24 @@ fun HomeTitle() {
     }
 }
 
-
 object HomePageActions {
 
     var STATUS = mutableStateOf(Status.STOP)
+    var STOP_ANIM = false
     var SUB_STATUS = mutableStateOf(SubStatus.STOP)
+
+    fun changeStatusTo(newStatus: Status) {
+        STATUS.value = newStatus
+    }
+
     fun invokeStatusTitle(status: Status): String {
         return when (status) {
             Status.STOP -> "未启动"
             Status.START -> "运行中"
             Status.CONNECTING -> "连接中"
             Status.ERROR -> "出错了"
+            Status.STARTING -> "启动中"
+            Status.FINISHING -> "连接中"
         }
     }
 
@@ -229,7 +272,7 @@ object HomePageActions {
             SubStatus.AUTH -> "正在验证账号密码..."
             SubStatus.STARTING -> "启动服务中..."
             SubStatus.CONNECTING -> "正在连接到VPN..."
-            SubStatus.FINISHED -> "连接完毕，点击停止"
+            SubStatus.FINISHED -> "连接成功"
             SubStatus.AUTH_ERROR -> "账号或密码错误"
             SubStatus.SERVICE_ERROR -> "无法启动VPN服务"
             SubStatus.NET_ERROR -> "网络异常"
