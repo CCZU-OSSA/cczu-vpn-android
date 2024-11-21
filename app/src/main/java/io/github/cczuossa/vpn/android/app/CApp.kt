@@ -1,9 +1,6 @@
 package io.github.cczuossa.vpn.android.app
 
 import android.app.Application
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 
 class CApp : Application() {
 

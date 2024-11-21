@@ -1,5 +1,9 @@
 package io.github.cczuossa.vpn.android.page
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
@@ -15,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextMotion
@@ -25,13 +30,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.*
+import io.github.cczuossa.vpn.android.MainActivity
 import io.github.cczuossa.vpn.android.R
+import io.github.cczuossa.vpn.android.app.readString
 import io.github.cczuossa.vpn.android.data.Status
 import io.github.cczuossa.vpn.android.data.SubStatus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import io.github.cczuossa.vpn.android.service.AppVpnService
 
 
 @Composable
@@ -47,7 +51,7 @@ fun HomePage(navController: NavController = rememberNavController()) {
             // 标题
             HomeTitle()
             // 状态框
-            StatusBroad()
+            StatusBroad(navController)
             // 主菜单
             HomeMenu(Modifier.weight(1f), navController)
         }
@@ -111,20 +115,22 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
 
 
 @Composable
-fun StatusBroad() {
+fun StatusBroad(navController: NavController) {
+    val ctx = LocalContext.current
     var status by remember { HomePageActions.STATUS }
     var subStatus by remember { HomePageActions.SUB_STATUS }
     val lottie by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.stop2success))
     val progress by animateLottieCompositionAsState(
         composition = lottie,
-        isPlaying = status != Status.STOP,
-        speed = 1.5f * if (status == Status.ERROR) -1f else 1f,
+        isPlaying = true,
+        speed = 1.5f * if (status == Status.ERROR || status == Status.STOP) -1f else 1f,
         iterations = if (status == Status.CONNECTING) LottieConstants.IterateForever else 1,
         cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
-        restartOnPlay = status != Status.START,
+        restartOnPlay = true,
         clipSpec =
             when (status) {
-                Status.STOP, Status.ERROR, Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
+                Status.STOP, Status.ERROR -> LottieClipSpec.Progress(0f, 0.125f)
+                Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
                 Status.FINISHING, Status.CONNECTING -> LottieClipSpec.Progress(0.25f, 0.75f)
                 Status.START -> LottieClipSpec.Progress(0.75f, 1f)
             }
@@ -137,6 +143,9 @@ fun StatusBroad() {
         HomePageActions.changeStatusTo(Status.START)
     }
 
+    LaunchedEffect(true) {
+        ctx.bindService(Intent(ctx, AppVpnService::class.java), HomePageActions.connection, 0)
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -149,24 +158,23 @@ fun StatusBroad() {
             //TODO: 根据状态改变背景颜色
             .background(color = Color(0xffc3cfe2), shape = RoundedCornerShape(10.dp))
             .clickable {
-                //if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
-                HomePageActions.changeStatusTo(Status.STARTING)
-                HomePageActions.SUB_STATUS.value = SubStatus.INIT
-                //TODO: 启动服务
-
-                // TODO: 测试代码，记得删除
-                GlobalScope.launch(Dispatchers.IO) {
-                    delay(2000)
-                    HomePageActions.SUB_STATUS.value = SubStatus.STARTING
-                    delay(2000)
-                    HomePageActions.SUB_STATUS.value = SubStatus.AUTH
-                    delay(2000)
-                    HomePageActions.SUB_STATUS.value = SubStatus.CONNECTING
-                    delay(2000)
-                    HomePageActions.SUB_STATUS.value = SubStatus.FINISHED
-                    HomePageActions.changeStatusTo(Status.FINISHING)
+                if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
+                    // 检查账号先
+                    if (ctx.readString("user").isBlank() || ctx.readString("pass").isBlank()) {
+                        ctx.toast("清先设置一个账号和密码")
+                        navController.navigate("account")
+                    } else {
+                        HomePageActions.changeStatusTo(Status.STARTING)
+                        HomePageActions.SUB_STATUS.value = SubStatus.INIT
+                        // 请求权限先
+                        MainActivity.permissionLauncher.launch(MainActivity.REQUEST_PERMISSIONS.toTypedArray())
+                    }
+                } else if (HomePageActions.STATUS.value == Status.START) {
+                    HomePageActions.changeStatusTo(Status.STARTING)
+                    HomePageActions.SUB_STATUS.value = SubStatus.INIT
+                    //停止服务
+                    ctx.stopService(Intent(ctx, AppVpnService::class.java))
                 }
-
 
             }
     ) {
@@ -240,6 +248,21 @@ object HomePageActions {
 
     @JvmStatic
     var SUB_STATUS = mutableStateOf(SubStatus.STOP)
+
+    val connection by lazy {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                changeStatusTo(Status.START)
+                SUB_STATUS.value = SubStatus.FINISHED
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                changeStatusTo(Status.STOP)
+                SUB_STATUS.value = SubStatus.STOP
+            }
+
+        }
+    }
 
     fun changeStatusTo(newStatus: Status) {
         STATUS.value = newStatus

@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS"/>
 
     <application
@@ -32,6 +33,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- Enlink vpn service -->
+        <service
+                android:name=".service.AppVpnService"
+                android:exported="true"
+                android:process=":vpn"
+                android:foregroundServiceType="specialUse"
+                android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="andorid.net.VpnService"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
