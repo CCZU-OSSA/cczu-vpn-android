@@ -19,5 +19,4 @@ fun SettingsPage(navController: NavController = rememberNavController()) {
     }
 }
 
-object SettingsPageActions {
-}
+//object SettingsPageActions

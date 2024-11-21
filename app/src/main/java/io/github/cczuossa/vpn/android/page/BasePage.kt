@@ -68,5 +68,4 @@ fun ActionButton(@DrawableRes icon: Int, onClick: () -> Unit) {
     }
 }
 
-object BasePageActions {
-}
+//object BasePageActions

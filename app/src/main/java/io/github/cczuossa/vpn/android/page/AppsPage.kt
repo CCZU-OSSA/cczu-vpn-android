@@ -1,9 +1,9 @@
 package io.github.cczuossa.vpn.android.page
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -181,5 +181,4 @@ fun AppSearchBar(searchText: String = "", onValueChanged: (String) -> Unit) {
     )
 }
 
-object AppsPageActions {
-}
+//object AppsPageActions
