@@ -1,5 +1,7 @@
 package io.github.cczuossa.vpn.android.page
 
+import android.content.Context
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -28,20 +30,21 @@ fun BasePage(
         topBar = {
             TopAppBar(
                 title = titleStyle, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack()
-                    },
-                    content = {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            "back $title"
-                        )
-                    }
-                )
-            }, actions = {
-                actions.invoke()
-            }, expandedHeight = 64.dp)
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        },
+                        content = {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_back),
+                                "back $title"
+                            )
+                        }
+                    )
+                }, actions = {
+                    actions.invoke()
+                }, expandedHeight = 64.dp
+            )
         },
 
         modifier = Modifier.fillMaxSize()
@@ -69,3 +72,8 @@ fun ActionButton(@DrawableRes icon: Int, onClick: () -> Unit) {
 }
 
 //object BasePageActions
+
+
+fun Context.toast(message: String, length: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(this, message, length).show()
+}

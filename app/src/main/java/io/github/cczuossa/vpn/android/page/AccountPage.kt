@@ -12,21 +12,28 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.R
+import io.github.cczuossa.vpn.android.app.readString
+import io.github.cczuossa.vpn.android.app.setString
 
 
 @Preview
 @Composable
 fun AccountPage(navController: NavController = rememberNavController()) {
-    var user by remember { mutableStateOf("") }
-    var pass by remember { mutableStateOf("") }
+    val ctx = LocalContext.current
+    var user by remember { mutableStateOf(ctx.readString("user")) }
+    var pass by remember { mutableStateOf(ctx.readString("pass")) }
+
     BasePage(navController, "账号设置", actions = {
         ActionButton(R.drawable.ic_check) {
-            //TODO: 储存 user 和 pass
+            ctx.setString("user", user)
+            ctx.setString("pass", pass)
+            ctx.toast("保存成功")
         }
 
     }) {
@@ -36,7 +43,6 @@ fun AccountPage(navController: NavController = rememberNavController()) {
         ) {
             AccountTextField(user, "用户名") { user = it }
             AccountTextField(pass, "密码") { pass = it }
-
         }
     }
 }

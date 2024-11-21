@@ -1,6 +1,5 @@
 package io.github.cczuossa.vpn.android.page
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
@@ -25,14 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCancellationBehavior
-import com.airbnb.lottie.compose.LottieClipSpec
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieAnimatable
-import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.*
 import io.github.cczuossa.vpn.android.R
 import io.github.cczuossa.vpn.android.data.Status
 import io.github.cczuossa.vpn.android.data.SubStatus
@@ -123,14 +115,13 @@ fun StatusBroad() {
     var status by remember { HomePageActions.STATUS }
     var subStatus by remember { HomePageActions.SUB_STATUS }
     val lottie by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.stop2success))
-
     val progress by animateLottieCompositionAsState(
         composition = lottie,
-        isPlaying = status != Status.STOP || HomePageActions.STOP_ANIM,
-        speed = 1.5f,
+        isPlaying = status != Status.STOP,
+        speed = 1.5f * if (status == Status.ERROR) -1f else 1f,
         iterations = if (status == Status.CONNECTING) LottieConstants.IterateForever else 1,
         cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
-        restartOnPlay = true,
+        restartOnPlay = status != Status.START,
         clipSpec =
             when (status) {
                 Status.STOP, Status.ERROR, Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
@@ -145,7 +136,6 @@ fun StatusBroad() {
     if (progress >= 0.74f && status == Status.FINISHING) {
         HomePageActions.changeStatusTo(Status.START)
     }
-    HomePageActions.STOP_ANIM = progress >= 1
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -181,7 +171,6 @@ fun StatusBroad() {
             }
     ) {
 
-        //TODO: 替换为lottie
         LottieAnimation(
             composition = lottie,
             progress = {
@@ -246,9 +235,10 @@ fun HomeTitle() {
 }
 
 object HomePageActions {
-
+    @JvmStatic
     var STATUS = mutableStateOf(Status.STOP)
-    var STOP_ANIM = false
+
+    @JvmStatic
     var SUB_STATUS = mutableStateOf(SubStatus.STOP)
 
     fun changeStatusTo(newStatus: Status) {
