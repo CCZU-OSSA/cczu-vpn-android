@@ -28,6 +28,7 @@ import io.github.cczuossa.vpn.android.data.SubStatus
 import io.github.cczuossa.vpn.android.page.AboutPage
 import io.github.cczuossa.vpn.android.page.AccountPage
 import io.github.cczuossa.vpn.android.page.AppsPage
+import io.github.cczuossa.vpn.android.page.AppsPageActions
 import io.github.cczuossa.vpn.android.page.HomePage
 import io.github.cczuossa.vpn.android.page.HomePageActions
 import io.github.cczuossa.vpn.android.page.SettingsPage
@@ -56,6 +57,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+        lateinit var permissionGetAppLauncher: ActivityResultLauncher<Array<String>>
         lateinit var prepareLauncher: ActivityResultLauncher<Intent>
         val receiverFilter = "io.github.cczuossa.vpn.status"
         val REQUEST_PERMISSIONS = arrayListOf(
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.ACCESS_WIFI_STATE,// 基础wifi状态检查权限
 
         )
+        val REQUEST_PERMISSIONS_APP = arrayListOf<String>()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +78,13 @@ class MainActivity : ComponentActivity() {
                 toast("您拒绝了创建VPN")
             }
         }
+        permissionGetAppLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+                AppsPageActions.allApps.clear()
+                AppsPageActions.allApps.addAll(
+                    this.packageManager.getInstalledPackages(0).filter { it.packageName != this.packageName })
+
+            }
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             if (result.all {
                     Log.d("123", "${it.key}: ${it.value}")
@@ -140,7 +150,7 @@ class MainActivity : ComponentActivity() {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {// 安卓11及其以上
             // 查询全部应用权限
-            REQUEST_PERMISSIONS.add(Manifest.permission.QUERY_ALL_PACKAGES)
+            REQUEST_PERMISSIONS_APP.add(Manifest.permission.QUERY_ALL_PACKAGES)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {// 安卓13及其以上
             // 添加通知权限
@@ -153,7 +163,7 @@ class MainActivity : ComponentActivity() {
         runCatching {
             if (packageManager.getPermissionInfo("com.android.permission.GET_INSTALLED_APPS", 0) != null) {
                 // miui特殊适配
-                REQUEST_PERMISSIONS.add("com.android.permission.GET_INSTALLED_APPS")
+                REQUEST_PERMISSIONS_APP.add("com.android.permission.GET_INSTALLED_APPS")
             }
         }
     }
