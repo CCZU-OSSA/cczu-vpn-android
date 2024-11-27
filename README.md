@@ -34,12 +34,31 @@ https://github.com/CCZU-OSSA/cczu-vpn-android/issues
 
 ### 如何编译
 
-编译之前先确保你的设备上拥有 AndroidSDK 与 JDK，需要`clone`此项目你还需要一个`git`
+编译之前先确保你的设备上拥有 AndroidSDK, Rust, OpenSSL 与 JDK，需要`clone`此项目你还需要一个`git`
+
+```sh
+rustup target add x86_64-linux-android armv7-linux-androideabi aarch64-linux-android i686-linux-android
+```
 
 然后运行以下代码
 
 ```sh
+
 git clone https://github.com/CCZU-OSSA/cczu-vpn-android.git
 cd cczu-vpn-android
 ./gradlew assembleDebug
 ```
+
+### Windows 编译
+
+由于项目有使用Openssl,因此在Windows下编译较为麻烦
+
+你需要安装Python < 3.13, AndroidSDK, Rust(stable-x86_64-pc-windows-gnu) 与 JDK
+
+首先安装msys2,并在msys2中执行以下指令:
+
+```sh
+pacman -S perl make
+```
+
+然后将 `msys2安装目录/bin` 添加到 `Path` 环境变量中, 然后重启电脑后编译此项目

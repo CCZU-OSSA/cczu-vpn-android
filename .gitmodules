@@ -1,0 +1,3 @@
+[submodule "proto/proto"]
+	path = proto/proto
+	url = git@github.com:CCZU-OSSA/cczu-vpn-proto.git

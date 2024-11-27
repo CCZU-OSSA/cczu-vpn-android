@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "cczu-vpn-android"
 include(":app")
+include(":proto")

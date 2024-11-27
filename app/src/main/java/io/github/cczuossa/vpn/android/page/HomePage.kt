@@ -41,9 +41,10 @@ import io.github.cczuossa.vpn.android.service.AppVpnService
 @Composable
 @Preview
 fun HomePage(navController: NavController = rememberNavController()) {
-    Scaffold {
+    Scaffold(content = { padding ->
         Column(
             modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
@@ -55,14 +56,15 @@ fun HomePage(navController: NavController = rememberNavController()) {
             // 主菜单
             HomeMenu(Modifier.weight(1f), navController)
         }
-    }
+    })
 
 }
 
 @Composable
 fun HomeMenu(modifier: Modifier, navController: NavController) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .padding(top = 40.dp, bottom = 60.dp)
 
     ) {
@@ -89,7 +91,8 @@ fun HomeMenu(modifier: Modifier, navController: NavController) {
 @Composable
 fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = {}) {
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .clickable {
                 clickable.invoke()
             }
@@ -97,7 +100,8 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 45.dp)
         ) {
             Image(
@@ -106,7 +110,8 @@ fun HomeMenuItem(title: String, @DrawableRes icon: Int, clickable: () -> Unit = 
                 modifier = Modifier.size(26.dp)
             )
             Text(
-                text = title, modifier = Modifier.padding(start = 15.dp)
+                text = title, modifier = Modifier
+                    .padding(start = 15.dp)
                     .padding(vertical = 13.dp)
             )
         }
@@ -128,12 +133,12 @@ fun StatusBroad(navController: NavController) {
         cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
         restartOnPlay = true,
         clipSpec =
-            when (status) {
-                Status.STOP, Status.ERROR -> LottieClipSpec.Progress(0f, 0.125f)
-                Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
-                Status.FINISHING, Status.CONNECTING -> LottieClipSpec.Progress(0.25f, 0.75f)
-                Status.START -> LottieClipSpec.Progress(0.75f, 1f)
-            }
+        when (status) {
+            Status.STOP, Status.ERROR -> LottieClipSpec.Progress(0f, 0.125f)
+            Status.STARTING -> LottieClipSpec.Progress(0f, 0.25f)
+            Status.FINISHING, Status.CONNECTING -> LottieClipSpec.Progress(0.25f, 0.75f)
+            Status.START -> LottieClipSpec.Progress(0.75f, 1f)
+        }
     )
 
     if (progress >= 0.24f && status == Status.STARTING) {
@@ -160,7 +165,12 @@ fun StatusBroad(navController: NavController) {
             .clickable {
                 if (HomePageActions.STATUS.value == Status.STOP || HomePageActions.STATUS.value == Status.ERROR) {
                     // 检查账号先
-                    if (ctx.readString("user").isBlank() || ctx.readString("pass").isBlank()) {
+                    if (ctx
+                            .readString("user")
+                            .isBlank() || ctx
+                            .readString("pass")
+                            .isBlank()
+                    ) {
                         ctx.toast("清先设置一个账号和密码")
                         navController.navigate("account")
                     } else {
@@ -173,7 +183,9 @@ fun StatusBroad(navController: NavController) {
                     HomePageActions.changeStatusTo(Status.STARTING)
                     HomePageActions.SUB_STATUS.value = SubStatus.INIT
                     //停止服务
-                    ctx.stopService(Intent(ctx, AppVpnService::class.java))
+                    ctx.unbindService(HomePageActions.connection)
+                    ctx.sendBroadcast(Intent(AppVpnService.receiverFilter))
+                    //ctx.stopService(Intent(ctx, AppVpnService::class.java))
                 }
 
             }
@@ -184,16 +196,22 @@ fun StatusBroad(navController: NavController) {
             progress = {
                 progress
             },
-            modifier = Modifier.size(26.dp)
+            modifier = Modifier
+                .size(26.dp)
                 .padding(start = 30.dp)
                 .weight(0.2f)
         )
         Column(
-            modifier = Modifier.padding(end = 30.dp, start = 15.dp)
+            modifier = Modifier
+                .padding(end = 30.dp, start = 15.dp)
                 .weight(0.8f)
         ) {
             AnimatedText(HomePageActions.invokeStatusTitle(status), 16.sp)
-            AnimatedText(HomePageActions.invokeSubStatusTitle(subStatus), 13.sp, Modifier.padding(top = 5.dp))
+            AnimatedText(
+                HomePageActions.invokeSubStatusTitle(subStatus),
+                13.sp,
+                Modifier.padding(top = 5.dp)
+            )
         }
     }
 }
@@ -223,7 +241,8 @@ fun HomeTitle() {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(top = 20.dp)
     ) {
         // 图标
@@ -272,7 +291,7 @@ object HomePageActions {
         return when (status) {
             Status.STOP -> "未启动"
             Status.START -> "运行中"
-            Status.CONNECTING -> "连接中"
+            Status.CONNECTING -> "请等待"
             Status.ERROR -> "出错了"
             Status.STARTING -> "启动中"
             Status.FINISHING -> "连接中"

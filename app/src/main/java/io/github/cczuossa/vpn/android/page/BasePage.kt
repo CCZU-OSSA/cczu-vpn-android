@@ -47,11 +47,16 @@ fun BasePage(
             )
         },
 
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding(),
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
             Spacer(modifier = Modifier.padding(top = 64.dp))
             content.invoke()
         }
@@ -64,7 +69,8 @@ fun ActionButton(@DrawableRes icon: Int, onClick: () -> Unit) {
         Image(
             painter = painterResource(id = icon),
             "action button $icon",
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier
+                .padding(4.dp)
                 .size(33.dp)
                 .padding(end = 5.dp)
         )
