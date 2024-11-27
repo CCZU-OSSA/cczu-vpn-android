@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.incremental.deleteDirectoryContents
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -62,56 +64,35 @@ android {
 
 cargo {
     module = "./proto"
-    libname = "proto"
+    libname = "cczuvpnproto"
     targets = arrayListOf("arm", "arm64", "x86", "x86_64")
     extraCargoBuildArguments = arrayListOf("-v", "-v")
+    apiLevel = android.defaultConfig.minSdk
     exec = { spec, toolchain ->
-        println(toolchain)
-        val toolchainDir = File(spec.environment["CC_${toolchain.target}"].toString()).parentFile
-        //println(toolchainDir.absolutePath)
+        val toolchainDir = File(spec.environment["CC_${toolchain.target}"].toString())
+            .parentFile
+            .absolutePath
+            .replace(
+                "\\",
+                "/"
+            )
+        spec.environment.forEach { s, any ->
+            println("$s:$any")
+        }
         spec.environment(
             "CC_${toolchain.target}",
-            "${
-                File(toolchainDir, "clang.exe").absolutePath.replace(
-                    "\\",
-                    "/"
-                )
-            } --target=${toolchain.compilerTriple}24"
+            "$toolchainDir/clang.exe --target=${toolchain.compilerTriple}$apiLevel"
         )
         spec.environment(
             "CXX_${toolchain.target}",
-            "${
-                File(toolchainDir, "clang++.exe").absolutePath.replace(
-                    "\\",
-                    "/"
-                )
-            } --target=${toolchain.compilerTriple}24"
+            "$toolchainDir/clang++.exe --target=${toolchain.compilerTriple}$apiLevel"
         )
-
         spec.environment(
             "RANLIB_${toolchain.target}",
-            File(toolchainDir, "llvm-ranlib.exe").absolutePath.replace(
-                "\\",
-                "/"
-            )
+            "$toolchainDir/llvm-ranlib.exe"
         )
-        /*
-
-        val target = if (toolchain.platform == "x86" || toolchain.platform == "x86_64")
-            toolchain.platform
-        else toolchain.binutilsTriple
-
-        spec.environment(
-            "RANLIB_${toolchain.target}", File(
-                toolchainDir.parentFile.parentFile.parentFile.parentFile,
-                "$target-4.9/prebuilt/windows-x86_64/bin/${toolchain.binutilsTriple}-ranlib.exe"
-            ).absolutePath.replace(
-                "\\",
-                "/"
-            )
-        )
-
-         */
+        spec.environment("CFLAGS_${toolchain.target}", "-Wl,--hash-style=both")
+        spec.environment("CXXFLAGS_${toolchain.target}", "-Wl,--hash-style=both")
     }
 
 
@@ -127,8 +108,32 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
+
 tasks.whenTaskAdded {
-    if (name == "javaPreCompileDebug" || name == "javaPreCompileRelease") {
-        dependsOn("cargoBuild")
+    if (name.startsWith("buildCMake")) {
+        val target = if (name.contains("x86_64")) {
+            "X86_64"
+        } else if (name.contains("x86")) {
+            "X86"
+        } else if (name.contains("armeabi-v7a")) {
+            "Arm"
+        } else {
+            "Arm64"
+        }
+        dependsOn("cargoBuild$target")
+    }
+    if (name == "clean") {
+        dependsOn("cargoClean")
     }
 }
+
+tasks.create("cargoClean") {
+    group = "rust"
+    val target = File(buildFile.parentFile, "${cargo.module}/target")
+    if (target.exists()) {
+        target.deleteDirectoryContents()
+    }
+    println("Clean rust target")
+}
+
+

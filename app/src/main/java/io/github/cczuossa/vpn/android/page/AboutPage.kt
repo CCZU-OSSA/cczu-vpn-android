@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.cczuossa.vpn.android.BuildConfig
 import io.github.cczuossa.vpn.android.R
+import io.github.cczuossa.vpn.proto.EnlinkProtocol
 
 @Preview
 @Composable
@@ -43,11 +44,12 @@ fun AboutPage(navController: NavController = rememberNavController()) {
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 // 版本
                 Text(
-                    text = "Ver ${BuildConfig.VERSION_NAME}",
+                    text = "App ver ${BuildConfig.VERSION_NAME} & Proto ver ${EnlinkProtocol.version()}",
                     fontSize = 15.sp
                 )
                 Row(
-                    modifier = Modifier.padding(start = 10.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
                         .clickable {
                             //TODO: 打开浏览器跳转Github
                         }

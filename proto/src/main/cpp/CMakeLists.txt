@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.22.1)
 # Since this is the top level CMakeLists.txt, the project name is also accessible
 # with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
 # build script scope).
-project("proto")
+project("native")
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -30,14 +30,14 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         proto.cpp)
 
-add_library(proto_rust SHARED IMPORTED)
-set_target_properties(proto_rust PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libffmpeg.so)
+add_library(proto SHARED IMPORTED)
+set_target_properties(proto PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../../../build/rustJniLibs/android/${CMAKE_ANDROID_ARCH_ABI}/libcczuvpnproto.so)
 
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this
 # build script, prebuilt third-party libraries, or Android system libraries.
 target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
-        proto_rust
+        proto
         android
         log)

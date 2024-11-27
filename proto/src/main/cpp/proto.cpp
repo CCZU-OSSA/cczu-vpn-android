@@ -4,7 +4,7 @@
 #include "enlink.h"
 
 
-jstring enlinkVersion(JNIEnv *env, jobject thiz) {
+jstring enlinkVersion(JNIEnv *env, jclass ) {
     const char *versionChar = version();
     jstring versionStr = env->NewStringUTF(versionChar);
     return versionStr;

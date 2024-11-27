@@ -54,7 +54,6 @@ fun BasePage(
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
         ) {
             Spacer(modifier = Modifier.padding(top = 64.dp))

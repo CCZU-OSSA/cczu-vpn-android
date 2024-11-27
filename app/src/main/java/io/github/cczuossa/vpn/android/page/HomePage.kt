@@ -44,7 +44,7 @@ fun HomePage(navController: NavController = rememberNavController()) {
     Scaffold(content = { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
+
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
