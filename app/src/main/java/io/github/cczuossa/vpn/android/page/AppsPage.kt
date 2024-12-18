@@ -17,8 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -42,11 +40,6 @@ import io.github.cczuossa.vpn.android.R
 import io.github.cczuossa.vpn.android.app.readStringList
 import io.github.cczuossa.vpn.android.app.setStringList
 import io.github.cczuossa.vpn.android.data.AppsInfo
-import io.github.cczuossa.vpn.android.data.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Preview
@@ -75,7 +68,7 @@ fun AppsPage(navController: NavController = rememberNavController()) {
     LaunchedEffect(AppsPageActions.allApps.size, searchText) {
         if (AppsPageActions.allApps.isNotEmpty()) {
             loading = true
-            //checkedApps.addAll(ctx.readStringList("apps"))
+            checkedApps.addAll(ctx.readStringList("apps"))
             apps.clear()
             AppsPageActions.allApps.filter { info ->
                 ctx.packageManager.getApplicationLabel(info.applicationInfo!!)
@@ -99,7 +92,8 @@ fun AppsPage(navController: NavController = rememberNavController()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier
+                        .fillMaxHeight()
                         .width(120.dp)
                 ) {
                     AnimatedVisibility(
@@ -118,7 +112,10 @@ fun AppsPage(navController: NavController = rememberNavController()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.padding(start = 8.dp).fillMaxHeight().width(120.dp)
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .fillMaxHeight()
+                        .width(120.dp)
                 ) {
                     // 搜索
                     ActionButton(R.drawable.ic_search) {
@@ -173,7 +170,8 @@ fun AppsPage(navController: NavController = rememberNavController()) {
                 val packageInfo = apps[i]
                 item(packageInfo.packageInfo.packageName + ".${packageInfo.checked}") {
                     AppsItem(
-                        bitmap = packageInfo.packageInfo.applicationInfo!!.loadIcon(ctx.packageManager).toBitmap()
+                        bitmap = packageInfo.packageInfo.applicationInfo!!.loadIcon(ctx.packageManager)
+                            .toBitmap()
                             .asImageBitmap(),
                         //painter = painterResource(R.drawable.ic_launcher_background),
                         name = ctx.packageManager.getApplicationLabel(packageInfo.packageInfo.applicationInfo!!)
@@ -211,14 +209,16 @@ fun AppsItem(
             bitmap = bitmap,
             //painter = painter,
             contentDescription = "",
-            modifier = Modifier.padding(start = 30.dp)
+            modifier = Modifier
+                .padding(start = 30.dp)
                 .size(35.dp)
         )
 
         // 标题
         Text(
             name,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
                 .padding(18.dp),
             fontSize = 20.sp,
         )
@@ -235,7 +235,11 @@ fun AppsItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppSearchBar(searchText: String = "", modifier: Modifier = Modifier, onValueChanged: (String) -> Unit) {
+fun AppSearchBar(
+    searchText: String = "",
+    modifier: Modifier = Modifier,
+    onValueChanged: (String) -> Unit
+) {
     BasicTextField(
         value = searchText,
         modifier = modifier
@@ -257,7 +261,12 @@ fun AppSearchBar(searchText: String = "", modifier: Modifier = Modifier, onValue
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 shape = MaterialTheme.shapes.medium,
-                contentPadding = PaddingValues(top = 2.dp, bottom = 2.dp, start = 16.dp, end = 33.dp)
+                contentPadding = PaddingValues(
+                    top = 2.dp,
+                    bottom = 2.dp,
+                    start = 16.dp,
+                    end = 33.dp
+                )
             )
         }
     )

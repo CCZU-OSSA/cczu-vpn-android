@@ -27,7 +27,10 @@ Java_io_github_cczuossa_vpn_proto_EnlinkProtocol_startService(JNIEnv *env, jclas
     jboolean copy = true;
     const char *userChar = env->GetStringUTFChars(user, &copy);
     const char *userPass = env->GetStringUTFChars(pass, &copy);
-    return start_service(userChar, userPass);
+    bool result = start_service(userChar, userPass);
+    env->ReleaseStringUTFChars(user, userChar);
+    env->ReleaseStringUTFChars(pass, userPass);
+    return result;
 }
 extern "C"
 JNIEXPORT jbyteArray JNICALL

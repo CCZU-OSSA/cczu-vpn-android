@@ -49,7 +49,8 @@ class MainActivity : ComponentActivity() {
                 //putExtra("download", download)// 下载速度
                 if (intent?.extras != null) {
                     HomePageActions.changeStatusTo(Status.valueOf(intent.extras?.getString("status")!!))
-                    HomePageActions.SUB_STATUS.value = SubStatus.valueOf(intent.extras?.getString("sub_status")!!)
+                    HomePageActions.SUB_STATUS.value =
+                        SubStatus.valueOf(intent.extras?.getString("sub_status")!!)
                 }
             }
         }
@@ -71,33 +72,37 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        prepareLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                initService()
-            } else {
-                toast("您拒绝了创建VPN")
+        prepareLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == RESULT_OK) {
+                    initService()
+                } else {
+                    toast("您拒绝了创建VPN")
+                }
             }
-        }
         permissionGetAppLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
                 AppsPageActions.allApps.clear()
                 AppsPageActions.allApps.addAll(
-                    this.packageManager.getInstalledPackages(0).filter { it.packageName != this.packageName })
+                    this.packageManager.getInstalledPackages(0)
+                        .filter { it.packageName != this.packageName })
 
             }
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            if (result.all {
-                    Log.d("123", "${it.key}: ${it.value}")
-                    it.value
-                }) {
-                // 申请VPN服务权限
-                VpnService.prepare(this)?.let { intent -> prepareLauncher.launch(intent) } ?: initService()
-            } else {
-                HomePageActions.SUB_STATUS.value = SubStatus.STOP
-                HomePageActions.changeStatusTo(Status.STOP)
-                toast("由于您拒绝了所需权限，因此应用无法正常运行")
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+                if (result.all {
+                        Log.d("123", "${it.key}: ${it.value}")
+                        it.value
+                    }) {
+                    // 申请VPN服务权限
+                    VpnService.prepare(this)?.let { intent -> prepareLauncher.launch(intent) }
+                        ?: initService()
+                } else {
+                    HomePageActions.SUB_STATUS.value = SubStatus.STOP
+                    HomePageActions.changeStatusTo(Status.STOP)
+                    toast("由于您拒绝了所需权限，因此应用无法正常运行")
+                }
             }
-        }
         resolvePermissions()
         enableEdgeToEdge()
         setContent {
@@ -161,7 +166,11 @@ class MainActivity : ComponentActivity() {
             REQUEST_PERMISSIONS.add(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE)
         }
         runCatching {
-            if (packageManager.getPermissionInfo("com.android.permission.GET_INSTALLED_APPS", 0) != null) {
+            if (packageManager.getPermissionInfo(
+                    "com.android.permission.GET_INSTALLED_APPS",
+                    0
+                ) != null
+            ) {
                 // miui特殊适配
                 REQUEST_PERMISSIONS_APP.add("com.android.permission.GET_INSTALLED_APPS")
             }

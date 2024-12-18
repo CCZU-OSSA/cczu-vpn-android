@@ -66,7 +66,7 @@ cargo {
     module = "./proto"
     libname = "cczuvpnproto"
     targets = arrayListOf("arm", "arm64", "x86", "x86_64")
-    extraCargoBuildArguments = arrayListOf("-v", "-v")
+    extraCargoBuildArguments = arrayListOf(/*"-v", "-v"*/)
     apiLevel = android.defaultConfig.minSdk
     exec = { spec, toolchain ->
         val toolchainDir = File(spec.environment["CC_${toolchain.target}"].toString())
@@ -91,8 +91,6 @@ cargo {
             "RANLIB_${toolchain.target}",
             "$toolchainDir/llvm-ranlib.exe"
         )
-        spec.environment("CFLAGS_${toolchain.target}", "-Wl,--hash-style=both")
-        spec.environment("CXXFLAGS_${toolchain.target}", "-Wl,--hash-style=both")
     }
 
 
@@ -122,17 +120,16 @@ tasks.whenTaskAdded {
         }
         dependsOn("cargoBuild$target")
     }
-    if (name == "clean") {
-        dependsOn("cargoClean")
-    }
 }
 
 tasks.create("cargoClean") {
     group = "rust"
+    /*
     val target = File(buildFile.parentFile, "${cargo.module}/target")
     if (target.exists()) {
         target.deleteDirectoryContents()
     }
+     */
     println("Clean rust target")
 }
 
